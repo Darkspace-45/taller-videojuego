@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import React from 'react';
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({navigation} : any) {
   return (
     <View style={styles.container}>
       <Image
@@ -10,8 +10,15 @@ export default function WelcomeScreen() {
       />
       <Text style={styles.title}>¡Bienvenido a "Doom Epic"!</Text>
       <Text style={styles.subtitle}>¡Bienvenido, soldado! Prepárate para la batalla y vence a tus enemigos.</Text>
-      <View style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>¡Jugar ahora!</Text>
+      <TouchableOpacity style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>Iniciar Secion</Text>
+      </TouchableOpacity>
+      <View style={styles.registercont}>
+      <Text style={styles.subtitle2}>O regístrate para ser un marine: </Text>
+      <TouchableOpacity
+      onPress={()=> navigation.navigate("Register")} >
+        <Text style={styles.subtitle2}>Registrarse</Text>
+      </TouchableOpacity>
       </View>
     </View>
   );
@@ -40,6 +47,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#fff',
     marginBottom: 20,
+    textAlign:'center'
+  },
+  subtitle2: {
+    fontSize: 14,
+    color: '#fff',
+    marginTop: 15
   },
   buttonContainer: {
     backgroundColor: '#4CAF50',
@@ -51,4 +64,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  registercont:{
+    flexDirection: 'row'
+  }
 });
