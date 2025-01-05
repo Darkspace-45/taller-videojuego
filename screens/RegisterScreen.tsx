@@ -12,8 +12,23 @@ export default function RegisterScreen() {
   const [apellido, setApellido] = useState("")
   const [correo, setCorreo] = useState("")
   const [contraseña, setContraseña] = useState("")
-  const [vcontraeña, setVcontraseña] = useState("")
+  const [vcontraseña, setVcontraseña] = useState("")
   const [edad, setEdad] = useState("")
+
+  const handleRegister = () => {
+    if (nombre === "" || apellido === "" || correo === "" || contraseña === "" || vcontraseña === "" || edad === "") {
+      alert("Por favor, coloque los datos solicitados");
+    } else {
+      setNombre("");
+      setApellido("");
+      setCorreo("");
+      setContraseña("");
+      setVcontraseña("");
+      setEdad("");
+      alert("Se ha registrado un nuevo usuario");
+    }
+  };
+  
 
   return (
     <View>
@@ -42,7 +57,7 @@ export default function RegisterScreen() {
           placeholderTextColor={'black'}
           style={styles.input}
           onChangeText={ (texto)=> setApellido(texto) }
-          value= {nombre}
+          value= {apellido}
         />
         </View>
         <Text style={styles.titleBody2}>Ingrese su correo: </Text>
@@ -51,7 +66,7 @@ export default function RegisterScreen() {
           placeholderTextColor={'black'}
           style={styles.input3}
           onChangeText={ (texto)=> setCorreo(texto) }
-          value= {nombre}
+          value= {correo}
         />
         <Text style={styles.titleBody2}>Ingrese su contraseña: </Text>
         <View style={styles.continput}>
@@ -60,14 +75,17 @@ export default function RegisterScreen() {
           placeholderTextColor={'black'}
           style={styles.input2}
           onChangeText={ (texto)=> setContraseña(texto) }
-          value= {nombre}
+          value= {contraseña}
+          secureTextEntry={true}
+
         />
         <TextInput
           placeholder='Verifique Contraseña'
           placeholderTextColor={'black'}
           style={styles.input}
           onChangeText={ (texto)=> setVcontraseña(texto) }
-          value= {nombre}
+          value= {vcontraseña}
+          secureTextEntry={true}
         />
         </View>
         <Text style={styles.titleBody2}>Ingrese su edad: </Text>
@@ -76,9 +94,10 @@ export default function RegisterScreen() {
           placeholderTextColor={'black'}
           style={styles.input3}
           onChangeText={ (texto)=> setEdad(texto) }
-          value= {nombre}
+          value= {edad}
+          keyboardType='numeric'
         />
-        <TouchableOpacity style={styles.btn}>
+        <TouchableOpacity style={styles.btn} onPress={handleRegister}>
           <Text style={styles.titleBody}>Registarse</Text>
         </TouchableOpacity>
       </BodyComponent>
