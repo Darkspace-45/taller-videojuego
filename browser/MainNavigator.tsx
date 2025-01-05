@@ -3,6 +3,7 @@ import WelcomenScreen from "../screens/WelcomenScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import RegisterScreen from "../screens/RegisterScreen";
+import LoginScreen from "../screens/LoginScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -11,6 +12,7 @@ function MyDrawer() {
         <Drawer.Navigator>
             <Drawer.Screen name="Home" component={WelcomenScreen} options={{headerShown: false}}/>
             <Drawer.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
+            <Drawer.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         </Drawer.Navigator>
     );
 }

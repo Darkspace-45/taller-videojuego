@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
-import MainNavigator from './browsers/MainNavigator';
+import MainNavigator from './browser/MainNavigator';
+
 
 export default function App() {
   return (

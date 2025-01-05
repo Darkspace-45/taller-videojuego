@@ -10,7 +10,7 @@ export default function WelcomeScreen({navigation} : any) {
       />
       <Text style={styles.title}>¡Bienvenido a "Doom Epic"!</Text>
       <Text style={styles.subtitle}>¡Bienvenido, soldado! Prepárate para la batalla y vence a tus enemigos.</Text>
-      <TouchableOpacity style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.buttonContainer} onPress={()=> navigation.navigate("Login")}>
         <Text style={styles.buttonText}>Iniciar Secion</Text>
       </TouchableOpacity>
       <View style={styles.registercont}>
