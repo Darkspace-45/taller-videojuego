@@ -1,12 +1,39 @@
-import { Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
-import { INPUT_COLOR, PRIMARY_COLOR} from '../commons/constans'
+import { INPUT_COLOR, PRIMARY_COLOR } from '../commons/constans'
 import { TitleComponent } from '../components/title'
 import { BodyComponent } from '../components/BodyComponent'
+import { collection, getDocs, query, where } from 'firebase/firestore'
+import { dbs } from '../config/Config'
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: any) {
     const [correo, setCorreo] = useState("")
     const [contraseña, setContraseña] = useState("")
+
+    const handleLogin = async () => {
+        if (correo === "" || contraseña === "") {
+            Alert.alert("Por favor, coloque los datos solicitados");
+        } else {
+            try {
+                // Busca el usuario en Firebase
+                const querySnapshot = await getDocs(query(collection(dbs, "marines"), where("correo", "==", correo)));
+                if (querySnapshot.empty) {
+                    Alert.alert("Usuario no encontrado");
+                } else {
+                    const user = querySnapshot.docs[0].data();
+                    if (user.contraseña === contraseña) {
+                        Alert.alert("Inicio de sesión exitoso");
+                        navigation.navigate("Juego"); 
+                    } else {
+                        Alert.alert("Contraseña incorrecta");
+                    }
+                }
+            } catch (error) {
+                console.error("Error al iniciar sesión:", error);
+                Alert.alert("Hubo un error al iniciar sesión");
+            }
+        }
+    };
 
     return (
         <View>
@@ -37,9 +64,10 @@ export default function LoginScreen() {
                         style={styles.input}
                         onChangeText={(texto) => setContraseña(texto)}
                         value={contraseña}
+                        secureTextEntry={true}
                     />
                 </View>
-                <TouchableOpacity style={styles.btn}>
+                <TouchableOpacity style={styles.btn} onPress={() => handleLogin()}>
                     <Text style={styles.titleBody}>Iniciar Sesión</Text>
                 </TouchableOpacity>
             </BodyComponent>
@@ -104,7 +132,7 @@ const styles = StyleSheet.create({
         width: '60%',
         borderRadius: 20
     },
-    container:{
+    container: {
         color: '#235f52'
     }
 })

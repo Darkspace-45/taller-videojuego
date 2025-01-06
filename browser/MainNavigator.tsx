@@ -1,28 +1,39 @@
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createStackNavigator } from "@react-navigation/stack";
 import WelcomenScreen from "../screens/WelcomenScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
+import Juego from "../screens/Juego";
 
-const Drawer = createDrawerNavigator();
+const Tab = createBottomTabNavigator();
 
-function MyDrawer() {
+function MyTabs() {
     return (
-        <Drawer.Navigator>
-            <Drawer.Screen name="Home" component={WelcomenScreen} options={{headerShown: false}}/>
-            <Drawer.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
-            <Drawer.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
-        </Drawer.Navigator>
+        <Tab.Navigator>
+            <Tab.Screen name="Juego" component={Juego} />
+        </Tab.Navigator>    
     );
 }
 
-const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+function MyStack() {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen name="Home" component={WelcomenScreen} options={{headerShown: false}}/>
+            <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
+            <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
+            <Stack.Screen name="Juego" component={MyTabs} options={{headerShown: false}}/>
+        </Stack.Navigator>
+    );
+}
+
 
 export default function MainNavigator() {
     return (
         <NavigationContainer>
-            <MyDrawer />
+            <MyStack />
         </NavigationContainer>
     );
 }

@@ -1,4 +1,4 @@
-import { Image, StatusBar, StyleSheet, Text, TextInput, TextInputComponent, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TextInputComponent, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { BodyComponent } from '../components/BodyComponent'
 import { TitleComponent } from '../components/title'
@@ -20,9 +20,9 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (nombre === "" || apellido === "" || correo === "" || contraseña === "" || vcontraseña === "" || edad === "") {
-      alert("Por favor, coloque los datos solicitados");
+      Alert.alert("Por favor, coloque los datos solicitados");
     } else if (contraseña !== vcontraseña) {
-      alert("Las contraseñas no coinciden");
+      Alert.alert("Las contraseñas no coinciden");
     } else {
       try {
         // Guarda en Firebase
@@ -39,10 +39,10 @@ export default function RegisterScreen() {
         setContraseña("");
         setVcontraseña("");
         setEdad("");
-        alert("Se ha registrado un nuevo usuario");
+        Alert.alert("Se ha registrado un nuevo usuario");
       } catch (error) {
         console.error("Error al registrar usuario:", error);
-        alert("Hubo un error al registrar al usuario");
+        Alert.alert("Hubo un error al registrar al usuario");
       }
     }
   };
@@ -115,8 +115,8 @@ export default function RegisterScreen() {
           value= {edad}
           keyboardType='numeric'
         />
-        <TouchableOpacity style={styles.btn} onPress={handleRegister}>
-          <Text style={styles.titleBody}>Registarse</Text>
+        <TouchableOpacity style={styles.btn} onPress={()=> handleRegister()}>
+          <Text style={styles.titleBody}>Registrarse</Text>
         </TouchableOpacity>
       </BodyComponent>
     </View>
