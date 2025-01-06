@@ -3,6 +3,9 @@ import React, { useState } from 'react'
 import { BodyComponent } from '../components/BodyComponent'
 import { TitleComponent } from '../components/title'
 import { INPUT_COLOR, PRIMARY_COLOR, SECUNDARY_COLOR } from '../commons/constans'
+import { addDoc, collection } from 'firebase/firestore';
+import { db, dbs } from '../config/Config'
+
 
 
 
@@ -15,17 +18,32 @@ export default function RegisterScreen() {
   const [vcontraseña, setVcontraseña] = useState("")
   const [edad, setEdad] = useState("")
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (nombre === "" || apellido === "" || correo === "" || contraseña === "" || vcontraseña === "" || edad === "") {
       alert("Por favor, coloque los datos solicitados");
+    } else if (contraseña !== vcontraseña) {
+      alert("Las contraseñas no coinciden");
     } else {
-      setNombre("");
-      setApellido("");
-      setCorreo("");
-      setContraseña("");
-      setVcontraseña("");
-      setEdad("");
-      alert("Se ha registrado un nuevo usuario");
+      try {
+        // Guarda en Firebase
+        await addDoc(collection(dbs, "marines"), {
+          nombre,
+          apellido,
+          correo,
+          contraseña,
+          edad,
+        });
+        setNombre("");
+        setApellido("");
+        setCorreo("");
+        setContraseña("");
+        setVcontraseña("");
+        setEdad("");
+        alert("Se ha registrado un nuevo usuario");
+      } catch (error) {
+        console.error("Error al registrar usuario:", error);
+        alert("Hubo un error al registrar al usuario");
+      }
     }
   };
   
