@@ -33,6 +33,14 @@ function MyTabs() {
             <Tab.Screen
                 name="Integrantes"
                 component={Integrante}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: () => (
+                        <View>
+                            <Text>👥</Text>
+                        </View>
+                    ),
+                }}
             />
         </Tab.Navigator>
     );
