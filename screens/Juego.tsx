@@ -4,8 +4,8 @@ import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import Card from "../components/Card";
-import { db } from '../config/Config'; // Importa la configuración de Firebase
-import { ref, set } from 'firebase/database'; // Importa las funciones de Firebase
+import { db } from '../config/Config';
+import { ref, set } from 'firebase/database'; 
 
 const cards: string[] = [
     "🐷",
