@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { get, ref, set } from "firebase/database";
 import { db } from "../config/Config";
 import Canvas from "../components/Canvas";
+import { Button, View } from "react-native";
 
 export default function Juego() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -182,14 +183,15 @@ export default function Juego() {
         requestAnimationFrame(() => updateGame(ctx));
     };
 
-    return (
-        <div>
-            <Canvas ref={canvasRef} width={800} height={600}></Canvas>
-            <div>
-                <button onClick={() => buildBuilding(100, 200, "barracks")}>Build Barracks</button>
-                <button onClick={() => buildBuilding(300, 200, "mine")}>Build Mine</button>
-                <button onClick={() => trainUnit(150, 250)}>Train Soldier</button>
-            </div>
-        </div>
-    );
+return (
+    <View>
+        <Canvas ref={canvasRef} width={800} height={600}></Canvas>
+        <View>
+            <Button title="Build Barracks" onPress={() => buildBuilding(100, 200, "barracks")} />
+            <Button title="Build Mine" onPress={() => buildBuilding(300, 200, "mine")} />
+            <Button title="Train Soldier" onPress={() => trainUnit(150, 250)} />
+        </View>
+    </View>
+);
+               
 }

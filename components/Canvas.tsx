@@ -5,23 +5,24 @@ interface CanvasProps {
     height: number;
 }
 
-const Canvas = React.forwardRef<HTMLCanvasElement, CanvasProps>(({ width, height }, ref) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+const Canvas = React.forwardRef<HTMLCanvasElement, CanvasProps>(
+    ({ width, height }, ref) => {
+        const internalRef = useRef<HTMLCanvasElement>(null);
 
-    // Usamos el `ref` de React.forwardRef o el canvasRef interno si no se pasa un ref
-    const mergedRef = ref || canvasRef;
-
-    useEffect(() => {
-        const canvas = mergedRef && ('current' in mergedRef ? mergedRef.current : null);
-        if (canvas) {
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-                // Aquí puedes poner la lógica de dibujo del canvas
+        useEffect(() => {
+            const canvas = ref && "current" in ref ? ref.current : internalRef.current;
+            if (canvas) {
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    // Lógica de dibujo aquí
+                    ctx.fillStyle = "blue";
+                    ctx.fillRect(0, 0, width, height);
+                }
             }
-        }
-    }, [width, height, mergedRef]);
+        }, [ref, width, height]);
 
-    return <canvas ref={mergedRef} width={width} height={height} />;
-});
+        return <canvas ref={ref || internalRef} width={width} height={height} />;
+    }
+);
 
 export default Canvas;
