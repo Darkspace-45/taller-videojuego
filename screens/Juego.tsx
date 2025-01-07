@@ -1,195 +1,125 @@
-import React, { useState, useEffect, useRef } from "react";
-import { get, ref, set } from "firebase/database";
-import { db } from "../config/Config";
-import Canvas from "../components/Canvas";
+import * as React from "react";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from '@react-navigation/stack';
+import Card from "../components/Card";
+
+const cards: string[] = [
+    "🐷",
+    "🪝",
+    "⚛️",
+    "🔑",
+    "🥕",
+    "🥑",
+];
+
+type RootStackParamList = {
+    Juego: undefined;
+    ScoreScreen: { score: number };
+};
 
 export default function Juego() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [score, setScore] = useState(0);
-    const [resources, setResources] = useState({ gold: 100, wood: 50 });
-    const [gameOver, setGameOver] = useState(false);
-    const [buildings, setBuildings] = useState<Building[]>([]);
-    const [units, setUnits] = useState<Unit[]>([]);
-    const [enemies, setEnemies] = useState<Enemy[]>([]);
-    const [time, setTime] = useState(0);
+    const [board, setBoard] = React.useState<string[]>(() => shuffle([...cards, ...cards]));
+    const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
+    const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
+    const [score, setScore] = React.useState<number>(0);
+    const [timeLeft, setTimeLeft] = React.useState<number>(30); // Tiempo inicial en segundos (1 minuto)
 
-    interface Building {
-        x: number;
-        y: number;
-        type: "barracks" | "mine";
-    }
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Juego'>>();
 
-    interface Unit {
-        x: number;
-        y: number;
-        type: "soldier";
-        health: number;
-        damage: number;
-        speed: number;
-    }
-
-    interface Enemy {
-        x: number;
-        y: number;
-        health: number;
-        damage: number;
-    }
-
-    const buildingCosts = {
-        barracks: { gold: 50, wood: 20 },
-        mine: { gold: 30, wood: 10 }
-    };
-
-    const unitCost = { gold: 20, wood: 10 };
-
-    const enemyHealth = 50;
-    const enemyDamage = 5;
-    const enemySpeed = 2;
-
-    // Función para recolectar recursos
-    const collectResources = () => {
-        setResources((prevResources) => ({
-            gold: prevResources.gold + 1,
-            wood: prevResources.wood + 0.5
-        }));
-    };
-
-    // Función para construir edificios
-    const buildBuilding = (x: number, y: number, type: "barracks" | "mine") => {
-        const cost = buildingCosts[type];
-
-        if (resources.gold >= cost.gold && resources.wood >= cost.wood) {
-            setResources((prevResources) => ({
-                gold: prevResources.gold - cost.gold,
-                wood: prevResources.wood - cost.wood
-            }));
-            setBuildings((prevBuildings) => [...prevBuildings, { x, y, type }]);
-        }
-    };
-
-    // Función para entrenar unidades
-    const trainUnit = (x: number, y: number) => {
-        if (resources.gold >= unitCost.gold && resources.wood >= unitCost.wood) {
-            setResources((prevResources) => ({
-                gold: prevResources.gold - unitCost.gold,
-                wood: prevResources.wood - unitCost.wood
-            }));
-            const newUnit: Unit = { x, y, type: "soldier", health: 100, damage: 10, speed: 2 };
-            setUnits((prevUnits) => [...prevUnits, newUnit]);
-        }
-    };
-
-    // Función para generar enemigos
-    const spawnEnemies = () => {
-        if (time % 100 === 0) {
-            const newEnemy: Enemy = {
-                x: Math.random() * 800,
-                y: 0,
-                health: enemyHealth,
-                damage: enemyDamage,
-            };
-            setEnemies((prevEnemies) => [...prevEnemies, newEnemy]);
-        }
-    };
-
-    // Función para mover enemigos
-    const moveEnemies = () => {
-        setEnemies((prevEnemies) =>
-            prevEnemies.map((enemy) => {
-                return { ...enemy, y: enemy.y + enemySpeed };
-            })
-        );
-    };
-
-    // Función para detectar colisiones con unidades
-    const checkUnitCollisions = () => {
-        units.forEach((unit) => {
-            enemies.forEach((enemy) => {
-                if (Math.abs(unit.x - enemy.x) < 50 && Math.abs(unit.y - enemy.y) < 50) {
-                    // Colisión: el enemigo ataca la unidad
-                    unit.health -= enemy.damage;
-                    if (unit.health <= 0) {
-                        setUnits((prevUnits) => prevUnits.filter((u) => u !== unit));
-                    }
-                }
-            });
-        });
-    };
-
-    // Función para actualizar puntaje
-    const updateScore = () => {
-        const newScore = units.length * 10; // Example score calculation based on number of units
-        setScore(newScore);
-    };
-
-    // Función para dibujar el juego
-    const drawGame = (ctx: CanvasRenderingContext2D) => {
-        ctx.clearRect(0, 0, 800, 600);
-
-        // Dibujar recursos
-        ctx.fillStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillText(`Gold: ${resources.gold}`, 10, 30);
-        ctx.fillText(`Wood: ${resources.wood}`, 10, 60);
-
-        // Dibujar edificios
-        buildings.forEach((building) => {
-            ctx.fillStyle = building.type === "barracks" ? "blue" : "green";
-            ctx.fillRect(building.x, building.y, 50, 50);
-        });
-
-        // Dibujar unidades
-        units.forEach((unit) => {
-            ctx.fillStyle = "red";
-            ctx.fillRect(unit.x, unit.y, 30, 30);
-        });
-
-        // Dibujar enemigos
-        enemies.forEach((enemy) => {
-            ctx.fillStyle = "orange";
-            ctx.fillRect(enemy.x, enemy.y, 30, 30);
-        });
-
-        // Dibujar puntaje
-        ctx.fillStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillText(`Score: ${score}`, 10, 90);
-    };
-
-    // Guardar puntaje en Firebase
-    const saveScoreToFirebase = async () => {
-        const scoreRef = ref(db, "scores/");
-        const snapshot = await get(scoreRef);
-        const currentScores = snapshot.val() || [];
-        currentScores.push({ score, date: new Date().toISOString() });
-        await set(ref(db, "scores/"), currentScores);
-    };
-
-    // Game Loop
-    const updateGame = (ctx: CanvasRenderingContext2D) => {
-        if (gameOver) {
-            saveScoreToFirebase();
+    // Efecto para el temporizador
+    React.useEffect(() => {
+        if (timeLeft === 0) {
+            // Si el tiempo se agotó, navega a la pantalla de puntajes
+            navigation.navigate("ScoreScreen", { score });
             return;
         }
 
-        spawnEnemies();
-        moveEnemies();
-        checkUnitCollisions();
-        updateScore();
-        drawGame(ctx);
-        setTime((prevTime) => prevTime + 1);
+        const timerId = setInterval(() => {
+            setTimeLeft((prev) => prev - 1);
+        }, 1000); // Disminuye cada segundo
 
-        requestAnimationFrame(() => updateGame(ctx));
+        return () => clearInterval(timerId); // Limpiar el temporizador cuando el componente se desmonte
+    }, [timeLeft, score, navigation]);
+
+    React.useEffect(() => {
+        if (selectedCards.length < 2) return;
+
+        if (board[selectedCards[0]] === board[selectedCards[1]]) {
+            setMatchedCards((prev) => [...prev, ...selectedCards]);
+            setScore((prev) => prev + 15);
+            setSelectedCards([]);
+        } else {
+            const timeoutId = setTimeout(() => setSelectedCards([]), 1000);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [selectedCards, board]);
+
+    React.useEffect(() => {
+        if (matchedCards.length === board.length) {
+            navigation.navigate("ScoreScreen", { score });
+        }
+    }, [matchedCards, navigation, score]);
+
+    const handleTapCard = (index: number): void => {
+        if (selectedCards.length >= 2 || selectedCards.includes(index)) return;
+        setSelectedCards((prev) => [...prev, index]);
     };
 
+    const didPlayerWin = (): boolean => matchedCards.length === board.length;
+
     return (
-        <div>
-            <Canvas ref={canvasRef} width={800} height={600}></Canvas>
-            <div>
-                <button onClick={() => buildBuilding(100, 200, "barracks")}>Build Barracks</button>
-                <button onClick={() => buildBuilding(300, 200, "mine")}>Build Mine</button>
-                <button onClick={() => trainUnit(150, 250)}>Train Soldier</button>
-            </div>
-        </div>
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>
+                {didPlayerWin() ? "Felicitaciones 🎉" : "Memory"}
+            </Text>
+            <Text style={styles.title}>Score: {score}</Text>
+            <Text style={styles.title}>Tiempo restante: {timeLeft}s</Text>
+            <View style={styles.board}>
+                {board.map((card, index) => {
+                    const isTurnedOver =
+                        selectedCards.includes(index) || matchedCards.includes(index);
+                    return (
+                        <Card
+                            key={index}
+                            isTurnedOver={isTurnedOver}
+                            onPress={() => handleTapCard(index)}
+                        >
+                            {card}
+                        </Card>
+                    );
+                })}
+            </View>
+            <StatusBar style="light" />
+        </SafeAreaView>
     );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#0f172a",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    board: {
+        flexDirection: "row",
+        justifyContent: "center",
+        flexWrap: "wrap",
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: "900",
+        color: "snow",
+        marginVertical: 15,
+    },
+});
+
+function shuffle<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
+    }
+    return array;
 }

@@ -43,10 +43,10 @@ export default function LoginScreen({ navigation }: any) {
             <BodyComponent>
                 <View>
                     <Text style={styles.titleBody}>Bienvenido!</Text>
-                    <Text style={styles.descriptionBody}>Inicia sesión para acceder a tu cuenta.</Text>
+                    <Text style={styles.descriptionBody}>Inicia sesión para acceder al juego.</Text>
                 </View>
                 <View style={styles.contimf}>
-                    <Image source={{ uri: "https://art.pixilart.com/e09926b6c235457.png" }}
+                    <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/994/994195.png" }}
                         style={styles.img} />
                 </View>
                 <Text style={styles.titleBody2}>Ingrese su correo y contraseña:</Text>

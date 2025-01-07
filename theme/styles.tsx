@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     contentBody: {
-        backgroundColor: SECUNDARY_COLOR,
+        backgroundColor: '#f4436f40',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingHorizontal: 25,

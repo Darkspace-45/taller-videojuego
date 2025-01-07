@@ -5,11 +5,11 @@ export default function WelcomeScreen({navigation} : any) {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/img/hue.png')} 
+        source={require('../assets/img/sensorial.png')} 
         style={styles.logo}
       />
-      <Text style={styles.title}>¡Bienvenido a "Tower Defense"!</Text>
-      <Text style={styles.subtitle}>¡Bienvenido! Prepárate para defender tu base de oleadas enemigas</Text>
+      <Text style={styles.title}>¡Bienvenido a "Caza Pares"!</Text>
+      <Text style={styles.subtitle}>¡Bienvenido! Prepárate para poner a prueba tu memoria</Text>
       <TouchableOpacity style={styles.buttonContainer} onPress={()=> navigation.navigate("Login")}>
         <Text style={styles.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
