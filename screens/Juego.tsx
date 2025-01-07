@@ -57,7 +57,6 @@ export default function Juego() {
             return () => clearTimeout(timeoutId);
         }
     }, [selectedCards, board]);
-
     useEffect(() => {
         if (matchedCards.length === board.length) {
             navigation.navigate("ScoreScreen", { score });

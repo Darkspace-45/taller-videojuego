@@ -16,7 +16,7 @@ export default function LoginScreen({ navigation }: any) {
         } else {
             try {
                 // Busca el usuario en Firebase
-                const querySnapshot = await getDocs(query(collection(dbs, "marines"), where("correo", "==", correo)));
+                const querySnapshot = await getDocs(query(collection(dbs, "usuarios"), where("correo", "==", correo)));
                 if (querySnapshot.empty) {
                     Alert.alert("Usuario no encontrado");
                 } else {

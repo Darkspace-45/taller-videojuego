@@ -7,6 +7,8 @@ import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
 import Juego from "../screens/Juego";
 import { ScoresScreen } from "../screens/ScoreScreen";
+import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from "react-native";
 
 
 
@@ -15,7 +17,18 @@ const Tab = createBottomTabNavigator();
 function MyTabs() {
     return (
         <Tab.Navigator>
-            <Tab.Screen name="Juego" component={Juego} options={{ headerShown: false }} />
+            <Tab.Screen
+                name="Juego"
+                component={Juego}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: () => (
+                        <View>
+                            <Text>🎮</Text>
+                        </View>
+                    ),
+                }}
+            />
         </Tab.Navigator>
     );
 }
