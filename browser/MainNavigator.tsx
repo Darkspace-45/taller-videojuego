@@ -9,6 +9,7 @@ import Juego from "../screens/Juego";
 import { ScoresScreen } from "../screens/ScoreScreen";
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from "react-native";
+import Integrante from "../screens/Integrante";
 
 
 
@@ -28,6 +29,10 @@ function MyTabs() {
                         </View>
                     ),
                 }}
+            />
+            <Tab.Screen
+                name="Integrantes"
+                component={Integrante}
             />
         </Tab.Navigator>
     );
