@@ -8,13 +8,13 @@ export default function WelcomeScreen({navigation} : any) {
         source={require('../assets/img/hue.png')} 
         style={styles.logo}
       />
-      <Text style={styles.title}>¡Bienvenido a "Doom Epic"!</Text>
-      <Text style={styles.subtitle}>¡Bienvenido, soldado! Prepárate para la batalla y vence a tus enemigos.</Text>
+      <Text style={styles.title}>¡Bienvenido a "Tower Defense"!</Text>
+      <Text style={styles.subtitle}>¡Bienvenido! Prepárate para defender tu base de oleadas enemigas</Text>
       <TouchableOpacity style={styles.buttonContainer} onPress={()=> navigation.navigate("Login")}>
         <Text style={styles.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
       <View style={styles.registercont}>
-      <Text style={styles.subtitle2}>O regístrate para ser un marine: </Text>
+      <Text style={styles.subtitle2}>¿No tienes cuenta? Registrate aquí: </Text>
       <TouchableOpacity
       onPress={()=> navigation.navigate("Register")} >
         <Text style={styles.subtitle2}>Registrarse</Text>

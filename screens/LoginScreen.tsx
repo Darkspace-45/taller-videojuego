@@ -42,7 +42,7 @@ export default function LoginScreen({ navigation }: any) {
             <Text>{'\n'}</Text>
             <BodyComponent>
                 <View>
-                    <Text style={styles.titleBody}>Bienvenido Soldado!</Text>
+                    <Text style={styles.titleBody}>Bienvenido!</Text>
                     <Text style={styles.descriptionBody}>Inicia sesión para acceder a tu cuenta.</Text>
                 </View>
                 <View style={styles.contimf}>

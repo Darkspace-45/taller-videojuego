@@ -51,15 +51,13 @@ export default function RegisterScreen() {
   return (
     <View>
       <StatusBar backgroundColor={INPUT_COLOR} />
-      <TitleComponent title='Registro de Marine' />
+      <TitleComponent title='Registro de Usuario' />
       <BodyComponent>
       <View>
-      <Text style={styles.titleBody}>Bienvenido marine!</Text>
-      <Text style={styles.descriptionBody}>Listo para matar y desgarrar demonios!</Text>
+      <Text style={styles.titleBody}>Bienvenido!</Text>
+      <Text style={styles.descriptionBody}>Ingresa los datos solicitados para continuar</Text>
                 </View>
       <View style={styles.contimf}>
-      <Image source={{ uri: "https://art.pixilart.com/e09926b6c235457.png" }} 
-      style={styles.img}/>
       </View>
       <Text style={styles.titleBody2}>Ingrese su nombre y apellido: </Text>
       <View style={styles.continput}>
