@@ -1,9 +1,11 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import Card from "../components/Card";
+import { db } from '../config/Config'; // Importa la configuración de Firebase
+import { ref, set } from 'firebase/database'; // Importa las funciones de Firebase
 
 const cards: string[] = [
     "🐷",
@@ -29,7 +31,7 @@ export default function Juego() {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Juego'>>();
 
     // Efecto para el temporizador
-    React.useEffect(() => {
+    useEffect(() => {
         if (timeLeft === 0) {
             // Si el tiempo se agotó, navega a la pantalla de puntajes
             navigation.navigate("ScoreScreen", { score });
@@ -43,7 +45,7 @@ export default function Juego() {
         return () => clearInterval(timerId); // Limpiar el temporizador cuando el componente se desmonte
     }, [timeLeft, score, navigation]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (selectedCards.length < 2) return;
 
         if (board[selectedCards[0]] === board[selectedCards[1]]) {
@@ -56,11 +58,16 @@ export default function Juego() {
         }
     }, [selectedCards, board]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (matchedCards.length === board.length) {
             navigation.navigate("ScoreScreen", { score });
         }
     }, [matchedCards, navigation, score]);
+
+    // Guarda el puntaje en el Realtime Database
+    useEffect(() => {
+        saveScore();
+    }, [score]);
 
     const handleTapCard = (index: number): void => {
         if (selectedCards.length >= 2 || selectedCards.includes(index)) return;
@@ -68,6 +75,13 @@ export default function Juego() {
     };
 
     const didPlayerWin = (): boolean => matchedCards.length === board.length;
+
+    const saveScore = async () => {
+        await set(ref(db, 'scores'), {
+            score: score,
+            timestamp: new Date(),
+        });
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -95,6 +109,7 @@ export default function Juego() {
         </SafeAreaView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {

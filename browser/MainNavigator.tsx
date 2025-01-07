@@ -6,7 +6,9 @@ import WelcomenScreen from "../screens/WelcomenScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
 import Juego from "../screens/Juego";
-import ScoreScreen from "../screens/ScoreScreen";
+import { ScoresScreen } from "../screens/ScoreScreen";
+
+
 
 const Tab = createBottomTabNavigator();
 
@@ -45,7 +47,7 @@ function MyStack() {
             />
             <Stack.Screen
                 name="ScoreScreen"
-                component={ScoreScreen}
+                component={ScoresScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>

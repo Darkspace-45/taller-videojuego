@@ -4,7 +4,7 @@ import { getAnalytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { collection, getFirestore } from "firebase/firestore";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -25,6 +25,7 @@ const app = initializeApp(firebaseConfig);
 export const db = getDatabase();
 export const dbs = getFirestore();
 export const auth = getAuth();
+const scoresCollection = collection(dbs, 'scores');
 
 
 

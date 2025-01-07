@@ -26,7 +26,7 @@ export default function RegisterScreen() {
     } else {
       try {
         // Guarda en Firebase
-        await addDoc(collection(dbs, "marines"), {
+        await addDoc(collection(dbs, "usuarios"), {
           nombre,
           apellido,
           correo,
