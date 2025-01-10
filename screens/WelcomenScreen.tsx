@@ -1,29 +1,78 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Animated } from 'react-native';
+import React, { useEffect, useRef } from 'react';
 
 export default function WelcomeScreen({ navigation }: any) {
+  const rotation = useRef(new Animated.Value(0)).current;
+  const colorChange = useRef(new Animated.Value(0)).current; // Valor para la animación del color
+
+  // Efecto de rotación de la imagen
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(rotation, {
+          toValue: 1,
+          duration: 3000, // Duración de la rotación (puedes ajustarla)
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotation, {
+          toValue: 0,
+          duration: 3000, // Duración de la rotación (puedes ajustarla)
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [rotation]);
+
+  // Interpolación para la rotación
+  const rotateInterpolation = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'], // Gira de 0 a 180 grados
+  });
+
+  // Interpolación para cambiar el color del texto
+  const colorInterpolation = colorChange.interpolate({
+    inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+    outputRange: ['#FAD7A0', '#A9DFBF', '#AED6F1', '#F9E79F', '#D7BDE2', '#F5CBA7'], // Colores para el cambio
+  });
+
+  // Inicia la animación del color del texto
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(colorChange, {
+        toValue: 1,
+        duration: 5000, // Duración de la animación del color
+        useNativeDriver: false,
+      })
+    ).start();
+  }, [colorChange]);
+
   return (
     <ImageBackground
       source={require('../assets/img/cartas.jpg')} // Imagen de fondo.
       style={styles.background}
     >
       <View style={styles.container}>
-        <Image
+        <Animated.Image
           source={require('../assets/img/tarjetas.png')}
-          style={styles.logo}
+          style={[styles.logo, { transform: [{ rotateY: rotateInterpolation }] }]} // Aplica el efecto de rotación
         />
         <View style={styles.textBox}>
-          <Text style={styles.title}>¡Bienvenido a "Caza Pares"!</Text>
+          {/* Aplicar color interpolado al texto */}
+          <Animated.Text style={[styles.title, { color: colorInterpolation }]}>
+            ¡Bienvenido a "Caza Pares"!
+          </Animated.Text>
           <Text style={styles.subtitle}>
             ¡Prepárate para poner a prueba tu memoria y agilidad visual!
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={() => navigation.navigate('Login')}
+        {/* Usamos Animated.View en lugar de TouchableOpacity */}
+        <Animated.View
+          style={[styles.buttonContainer, { backgroundColor: colorInterpolation }]} // Cambia el color del botón
         >
-          <Text style={styles.buttonText}>Iniciar Sesión</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+          </TouchableOpacity>
+        </Animated.View>
         <View style={styles.registerContainer}>
           <Text style={styles.subtitle2}>¿No tienes cuenta?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -120,7 +169,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonContainer: {
-    backgroundColor: '#FF4500',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
@@ -133,7 +181,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#000',
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },

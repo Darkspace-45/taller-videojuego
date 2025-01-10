@@ -1,188 +1,199 @@
-import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import { BodyComponent } from '../components/BodyComponent'
-import { TitleComponent } from '../components/title'
-import { INPUT_COLOR, PRIMARY_COLOR, SECUNDARY_COLOR } from '../commons/constans'
-import { addDoc, collection } from 'firebase/firestore';
-import { db, dbs } from '../config/Config'
+import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { BodyComponent } from '../components/BodyComponent';
+import { TitleComponent } from '../components/title';
+import { INPUT_COLOR } from '../commons/constans';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/Config';
 
-export default function RegisterScreen({ navigation }: any) {  // Corregido aquí
-
-  const [nombre, setNombre] = useState("")
-  const [apellido, setApellido] = useState("")
-  const [correo, setCorreo] = useState("")
-  const [contraseña, setContraseña] = useState("")
-  const [vcontraseña, setVcontraseña] = useState("")
-  const [edad, setEdad] = useState("")
+export default function RegisterScreen({ navigation }: any) {
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [contraseña, setContraseña] = useState("");
+  const [vcontraseña, setVcontraseña] = useState("");
+  const [edad, setEdad] = useState("");
 
   function registro() {
+    if (contraseña !== vcontraseña) {
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
+      return;
+    }
+
     createUserWithEmailAndPassword(auth, correo, contraseña)
-    .then((userCredential) => {
-        // Signed up 
+      .then((userCredential) => {
         const user = userCredential.user;
+        Alert.alert('Registro exitoso', 'Usuario registrado correctamente.');
         navigation.navigate('Login');
-        // ...
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
         let titulo = '';
         let mensaje = '';
-        // Custom error handling
+
         if (errorCode === 'auth/weak-password') {
-            titulo = 'Contraseña débil';
-            mensaje = 'La contraseña debe tener al menos 6 caracteres.';
+          titulo = 'Contraseña débil';
+          mensaje = 'La contraseña debe tener al menos 6 caracteres.';
         } else if (errorCode === 'auth/email-already-in-use') {
-            titulo = 'Correo ya registrado';
-            mensaje = 'Este correo ya está en uso.';
+          titulo = 'Correo ya registrado';
+          mensaje = 'Este correo ya está en uso.';
         } else {
-            titulo = 'Error';
-            mensaje = 'Verifique los detalles ingresados.';
+          titulo = 'Error';
+          mensaje = 'Verifique los detalles ingresados.';
         }
         Alert.alert(titulo, mensaje);
-    });
-  }
-  
-  function handleRegister(): void {
-    throw new Error('Function not implemented.')
+      });
   }
 
   return (
-    <View>
-      <StatusBar backgroundColor={INPUT_COLOR} />
-      <TitleComponent title='Registro de Usuario' />
+    <View style={styles.container}>
+      <StatusBar backgroundColor={INPUT_COLOR} barStyle="light-content" />
+      <TitleComponent title="Registro de Usuario" />
       <BodyComponent>
-      <View>
-      <Text style={styles.titleBody}>Bienvenido!</Text>
-      <Text style={styles.descriptionBody}>Ingresa los datos solicitados para continuar</Text>
-                </View>
-      <View style={styles.contimf}>
-      </View>
-      <Text style={styles.titleBody2}>Ingrese su nombre y apellido: </Text>
-      <View style={styles.continput}>
-        <TextInput
-          placeholder='Nombre'
-          placeholderTextColor={'black'}
-          style={styles.input2}
-          onChangeText={ (texto)=> setNombre(texto) }
-          value= {nombre}
-        />
-        <TextInput
-          placeholder='Apellido'
-          placeholderTextColor={'black'}
-          style={styles.input}
-          onChangeText={ (texto)=> setApellido(texto) }
-          value= {apellido}
-        />
+        <View>
+          <Text style={styles.titleBody}>¡Bienvenido!</Text>
+          <Text style={styles.descriptionBody}>
+            Ingresa los datos solicitados para continuar
+          </Text>
         </View>
-        <Text style={styles.titleBody2}>Ingrese su correo: </Text>
-        <TextInput
-          placeholder='Correo'
-          placeholderTextColor={'black'}
-          style={styles.input3}
-          onChangeText={ (texto)=> setCorreo(texto) }
-          value= {correo}
-        />
-        <Text style={styles.titleBody2}>Ingrese su contraseña: </Text>
-        <View style={styles.continput}>
-        <TextInput
-          placeholder='Contraseña'
-          placeholderTextColor={'black'}
-          style={styles.input2}
-          onChangeText={ (texto)=> setContraseña(texto) }
-          value= {contraseña}
-          secureTextEntry={true}
-
-        />
-        <TextInput
-          placeholder='Verifique Contraseña'
-          placeholderTextColor={'black'}
-          style={styles.input}
-          onChangeText={ (texto)=> setVcontraseña(texto) }
-          value= {vcontraseña}
-          secureTextEntry={true}
-        />
+        {/* Nombre y Apellido */}
+        <View>
+          <Text style={styles.titleBody2}>Ingrese su nombre y apellido:</Text>
+          <View style={styles.row}>
+            <TextInput
+              placeholder="Nombre"
+              placeholderTextColor={'#888'}
+              style={[styles.input, styles.halfWidth]}
+              onChangeText={(texto) => setNombre(texto)}
+              value={nombre}
+            />
+            <TextInput
+              placeholder="Apellido"
+              placeholderTextColor={'#888'}
+              style={[styles.input, styles.halfWidth]}
+              onChangeText={(texto) => setApellido(texto)}
+              value={apellido}
+            />
+          </View>
         </View>
-        <Text style={styles.titleBody2}>Ingrese su edad: </Text>
-        <TextInput
-          placeholder='Edad'
-          placeholderTextColor={'black'}
-          style={styles.input3}
-          onChangeText={ (texto)=> setEdad(texto) }
-          value= {edad}
-          keyboardType='numeric'
-        />
-        <TouchableOpacity style={styles.btn} onPress={()=> registro()}>
-          <Text style={styles.titleBody}>Registrarse</Text>
+        {/* Correo */}
+        <View>
+          <Text style={styles.titleBody2}>Ingrese su correo:</Text>
+          <TextInput
+            placeholder="Correo"
+            placeholderTextColor={'#888'}
+            style={styles.input}
+            onChangeText={(texto) => setCorreo(texto)}
+            value={correo}
+          />
+        </View>
+        {/* Contraseña */}
+        <View>
+          <Text style={styles.titleBody2}>Ingrese su contraseña:</Text>
+          <View style={styles.row}>
+            <TextInput
+              placeholder="Contraseña"
+              placeholderTextColor={'#888'}
+              style={[styles.input, styles.halfWidth]}
+              onChangeText={(texto) => setContraseña(texto)}
+              value={contraseña}
+              secureTextEntry={true}
+            />
+            <TextInput
+              placeholder="Verifique Contraseña"
+              placeholderTextColor={'#888'}
+              style={[styles.input, styles.halfWidth]}
+              onChangeText={(texto) => setVcontraseña(texto)}
+              value={vcontraseña}
+              secureTextEntry={true}
+            />
+          </View>
+        </View>
+        {/* Edad */}
+        <View>
+          <Text style={styles.titleBody2}>Ingrese su edad:</Text>
+          <TextInput
+            placeholder="Edad"
+            placeholderTextColor={'#888'}
+            style={styles.input}
+            onChangeText={(texto) => setEdad(texto)}
+            value={edad}
+            keyboardType="numeric"
+          />
+        </View>
+        {/* Botón */}
+        <TouchableOpacity style={styles.btn} onPress={() => registro()}>
+          <Text style={styles.btnText}>Registrarse</Text>
         </TouchableOpacity>
       </BodyComponent>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-    img:{
-        width:150,
-        height:150,
-        resizeMode:'contain',
-        borderRadius:100,
-        marginTop:10
-    },
-    contimf:{
-      alignItems:'center'
-    },
-    input:{
-        backgroundColor: INPUT_COLOR,
-        paddingVertical: 10,
-        paddingHorizontal:10,
-        borderRadius: 10,
-        marginTop:15,
-        width:'50%'
-    },    
-    input2:{
-        backgroundColor: INPUT_COLOR,
-        paddingVertical: 10,
-        paddingHorizontal:10,
-        borderRadius: 10,
-        marginTop:15,
-        width:'50%',
-        marginRight:10
-    },
-    input3:{
-      backgroundColor: INPUT_COLOR,
-      paddingVertical: 10,
-      paddingHorizontal:10,
-      borderRadius: 10,
-      marginTop:15,
-      marginRight:10
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f6fa',
+    paddingHorizontal: 20,
+    justifyContent: 'center',
   },
-    continput:{
-      flexDirection:"row",
-      alignItems:'center'
-    },
-    titleBody: {
-      fontSize: 17,
-      fontWeight: 'bold',
-      color: 'black'
+  titleBody: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  descriptionBody: {
+    fontSize: 22,
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   titleBody2: {
     fontSize: 18,
-    color: 'black',
-    marginTop:15
+    fontWeight: '600',
+    color: '#34495e',
+    marginBottom: 0,
   },
-  descriptionBody: {
-      fontSize: 15
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  btn:{
-    marginTop:20,
-    textAlign:'center',
-    alignItems:'center',
-    alignSelf:'center',
-    backgroundColor:'#90e683',
-    paddingVertical:15,
-    width:'60%',
-    borderRadius:20
-  }
-})
+  input: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 0,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#dcdde1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  halfWidth: {
+    width: '48%',
+  },
+  btn: {
+    marginTop: 30,
+    backgroundColor: '#2980b9',
+    paddingVertical: 15,
+    borderRadius: 30,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  btnText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+});
