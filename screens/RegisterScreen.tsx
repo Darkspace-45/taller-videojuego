@@ -1,15 +1,14 @@
-import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TextInputComponent, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { BodyComponent } from '../components/BodyComponent'
 import { TitleComponent } from '../components/title'
 import { INPUT_COLOR, PRIMARY_COLOR, SECUNDARY_COLOR } from '../commons/constans'
 import { addDoc, collection } from 'firebase/firestore';
 import { db, dbs } from '../config/Config'
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/Config';
 
-
-
-
-export default function RegisterScreen() {
+export default function RegisterScreen({ navigation }: any) {  // Corregido aquí
 
   const [nombre, setNombre] = useState("")
   const [apellido, setApellido] = useState("")
@@ -18,35 +17,37 @@ export default function RegisterScreen() {
   const [vcontraseña, setVcontraseña] = useState("")
   const [edad, setEdad] = useState("")
 
-  const handleRegister = async () => {
-    if (nombre === "" || apellido === "" || correo === "" || contraseña === "" || vcontraseña === "" || edad === "") {
-      Alert.alert("Por favor, coloque los datos solicitados");
-    } else if (contraseña !== vcontraseña) {
-      Alert.alert("Las contraseñas no coinciden");
-    } else {
-      try {
-        // Guarda en Firebase
-        await addDoc(collection(dbs, "usuarios"), {
-          nombre,
-          apellido,
-          correo,
-          contraseña,
-          edad,
-        });
-        setNombre("");
-        setApellido("");
-        setCorreo("");
-        setContraseña("");
-        setVcontraseña("");
-        setEdad("");
-        Alert.alert("Se ha registrado un nuevo usuario");
-      } catch (error) {
-        console.error("Error al registrar usuario:", error);
-        Alert.alert("Hubo un error al registrar al usuario");
-      }
-    }
-  };
+  function registro() {
+    createUserWithEmailAndPassword(auth, correo, contraseña)
+    .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        navigation.navigate('Login');
+        // ...
+    })
+    .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        let titulo = '';
+        let mensaje = '';
+        // Custom error handling
+        if (errorCode === 'auth/weak-password') {
+            titulo = 'Contraseña débil';
+            mensaje = 'La contraseña debe tener al menos 6 caracteres.';
+        } else if (errorCode === 'auth/email-already-in-use') {
+            titulo = 'Correo ya registrado';
+            mensaje = 'Este correo ya está en uso.';
+        } else {
+            titulo = 'Error';
+            mensaje = 'Verifique los detalles ingresados.';
+        }
+        Alert.alert(titulo, mensaje);
+    });
+  }
   
+  function handleRegister(): void {
+    throw new Error('Function not implemented.')
+  }
 
   return (
     <View>
@@ -113,7 +114,7 @@ export default function RegisterScreen() {
           value= {edad}
           keyboardType='numeric'
         />
-        <TouchableOpacity style={styles.btn} onPress={()=> handleRegister()}>
+        <TouchableOpacity style={styles.btn} onPress={()=> registro()}>
           <Text style={styles.titleBody}>Registrarse</Text>
         </TouchableOpacity>
       </BodyComponent>

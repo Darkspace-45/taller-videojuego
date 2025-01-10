@@ -5,35 +5,45 @@ import { TitleComponent } from '../components/title'
 import { BodyComponent } from '../components/BodyComponent'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { dbs } from '../config/Config'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../config/Config';
 
 export default function LoginScreen({ navigation }: any) {
     const [correo, setCorreo] = useState("")
     const [contraseña, setContraseña] = useState("")
-
-    const handleLogin = async () => {
-        if (correo === "" || contraseña === "") {
-            Alert.alert("Por favor, coloque los datos solicitados");
-        } else {
-            try {
-                // Busca el usuario en Firebase
-                const querySnapshot = await getDocs(query(collection(dbs, "usuarios"), where("correo", "==", correo)));
-                if (querySnapshot.empty) {
-                    Alert.alert("Usuario no encontrado");
-                } else {
-                    const user = querySnapshot.docs[0].data();
-                    if (user.contraseña === contraseña) {
-                        Alert.alert("Inicio de sesión exitoso");
-                        navigation.navigate("Juego"); 
-                    } else {
-                        Alert.alert("Contraseña incorrecta");
-                    }
-                }
-            } catch (error) {
-                console.error("Error al iniciar sesión:", error);
-                Alert.alert("Hubo un error al iniciar sesión");
-            }
+    function login() {
+        if (!correo || !contraseña) {
+            // Validación para campos vacíos
+            Alert.alert('Error', 'Por favor ingrese los datos en todos los campos.');
+            return;
         }
-    };
+        signInWithEmailAndPassword (auth, correo, contraseña)
+            .then((userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                console.log(user);
+                navigation.navigate('Juego');
+                // ...
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                let titulo = '';
+                let mensaje = '';
+                // ...
+                if (errorCode === 'auth/invalid-credential') {
+                    titulo = 'Credenciales inválidas';
+                    mensaje = 'Las credenciales son incorrectas, Verificar!';
+                } else if (errorCode === 'auth/invalid-email') {
+                    titulo = 'Error en el correo electrónico';
+                    mensaje = 'Verificar la dirección de correo electrónico';
+                } else {
+                    titulo = 'Error';
+                    mensaje = 'Verificar correo electrónico y contraseña';
+                }
+                Alert.alert(titulo, mensaje);
+            });
+    }
 
     return (
         <View>
@@ -67,14 +77,13 @@ export default function LoginScreen({ navigation }: any) {
                         secureTextEntry={true}
                     />
                 </View>
-                <TouchableOpacity style={styles.btn} onPress={() => handleLogin()}>
+                <TouchableOpacity style={styles.btn} onPress={() => login()}>
                     <Text style={styles.titleBody}>Iniciar Sesión</Text>
                 </TouchableOpacity>
             </BodyComponent>
         </View>
     )
 }
-
 const styles = StyleSheet.create({
     img: {
         width: 150,
