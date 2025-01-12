@@ -4,11 +4,11 @@
     "slug": "taller-videojuego",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/img/revolver.png",
+    "icon": "./assets/img/libros.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/img/revolver.png",
+      "image": "./assets/img/libros.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

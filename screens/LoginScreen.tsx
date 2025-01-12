@@ -1,43 +1,62 @@
-import { Alert, Image, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import { INPUT_COLOR, PRIMARY_COLOR } from '../commons/constans'
-import { TitleComponent } from '../components/title'
-import { BodyComponent } from '../components/BodyComponent'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { dbs } from '../config/Config'
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { TitleComponent } from '../components/title';
+import { BodyComponent } from '../components/BodyComponent';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/Config';
 
 export default function LoginScreen({ navigation }: any) {
-    const [correo, setCorreo] = useState("")
-    const [contraseña, setContraseña] = useState("")
+    const [correo, setCorreo] = useState("");
+    const [contraseña, setContraseña] = useState("");
 
-    const handleLogin = async () => {
-        if (correo === "" || contraseña === "") {
-            Alert.alert("Por favor, coloque los datos solicitados");
-        } else {
-            try {
-                // Busca el usuario en Firebase
-                const querySnapshot = await getDocs(query(collection(dbs, "marines"), where("correo", "==", correo)));
-                if (querySnapshot.empty) {
-                    Alert.alert("Usuario no encontrado");
-                } else {
-                    const user = querySnapshot.docs[0].data();
-                    if (user.contraseña === contraseña) {
-                        Alert.alert("Inicio de sesión exitoso");
-                        navigation.navigate("Juego"); 
-                    } else {
-                        Alert.alert("Contraseña incorrecta");
-                    }
-                }
-            } catch (error) {
-                console.error("Error al iniciar sesión:", error);
-                Alert.alert("Hubo un error al iniciar sesión");
-            }
+    // Animaciones
+    const rotateMiddle = new Animated.Value(0); 
+
+    useEffect(() => {
+        
+        Animated.loop(
+            Animated.timing(rotateMiddle, {
+                toValue: 1,
+                duration: 2000, 
+                useNativeDriver: true, 
+            })
+        ).start();
+    }, []);
+
+    function login() {
+        if (!correo || !contraseña) {
+            // Validación para campos vacíos
+            Alert.alert('Error', 'Por favor ingrese los datos en todos los campos.');
+            return;
         }
-    };
+        signInWithEmailAndPassword(auth, correo, contraseña)
+            .then((userCredential) => {
+                // Signed in 
+                const user = userCredential.user;
+                console.log(user);
+                navigation.navigate('Juego');
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                let titulo = '';
+                let mensaje = '';
+                if (errorCode === 'auth/invalid-credential') {
+                    titulo = 'Credenciales inválidas';
+                    mensaje = 'Las credenciales son incorrectas, Verificar!';
+                } else if (errorCode === 'auth/invalid-email') {
+                    titulo = 'Error en el correo electrónico';
+                    mensaje = 'Verificar la dirección de correo electrónico';
+                } else {
+                    titulo = 'Error';
+                    mensaje = 'Verificar correo electrónico y contraseña';
+                }
+                Alert.alert(titulo, mensaje);
+            });
+    }
 
     return (
         <View>
-            <StatusBar backgroundColor={PRIMARY_COLOR} />
             <TitleComponent title='Iniciar Sesión' />
             <Text>{'\n'}</Text>
             <BodyComponent>
@@ -45,11 +64,42 @@ export default function LoginScreen({ navigation }: any) {
                     <Text style={styles.titleBody}>Bienvenido!</Text>
                     <Text style={styles.descriptionBody}>Inicia sesión para acceder al juego.</Text>
                 </View>
-                <View style={styles.contimf}>
-                    <Image source={{ uri: "https://cdn-icons-png.flaticon.com/128/994/994195.png" }}
-                        style={styles.img} />
+                <View style={styles.imgContainer}>
+                    <Animated.Image
+                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351196.png" }}
+                        style={[styles.img, {
+                            transform: [{
+                                rotateY: rotateMiddle.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['0deg', '720deg'] 
+                                })
+                            }]
+                        }]}
+                    />
+                    <Animated.Image
+                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/4614/4614235.png" }}
+                        style={[styles.img, {
+                            transform: [{
+                                rotateY: rotateMiddle.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['0deg', '720deg'] 
+                                })
+                            }]
+                        }]}
+                    />
+                    <Animated.Image
+                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351463.png" }}
+                        style={[styles.img, {
+                            transform: [{
+                                rotateY: rotateMiddle.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['0deg', '720deg']
+                                })
+                            }]
+                        }]}
+                    />
                 </View>
-                <Text style={styles.titleBody2}>Ingrese su correo y contraseña:</Text>
+
                 <View style={styles.continput}>
                     <TextInput
                         placeholder='Correo'
@@ -67,72 +117,105 @@ export default function LoginScreen({ navigation }: any) {
                         secureTextEntry={true}
                     />
                 </View>
-                <TouchableOpacity style={styles.btn} onPress={() => handleLogin()}>
+                <TouchableOpacity style={styles.btn} onPress={() => login()}>
                     <Text style={styles.titleBody}>Iniciar Sesión</Text>
                 </TouchableOpacity>
             </BodyComponent>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FFFFFF', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+    },
+    imgContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly', 
+        alignItems: 'center',
+        marginTop: 30,
+        width: '80%', 
+    },
     img: {
-        width: 150,
-        height: 150,
+        width: 110,
+        height: 110,
         resizeMode: 'contain',
-        borderRadius: 100,
-        marginTop: 10
-    },
-    contimf: {
-        alignItems: 'center'
-    },
-    input: {
-        backgroundColor: INPUT_COLOR,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderRadius: 10,
-        marginTop: 15,
-        width: '50%'
-    },
-    input2: {
-        backgroundColor: INPUT_COLOR,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        borderRadius: 10,
-        marginTop: 15,
-        width: '50%',
-        marginRight: 10
+        borderRadius: 55, 
     },
     continput: {
-        flexDirection: "row",
-        alignItems: 'center'
+        flexDirection: "column", 
+        alignItems: 'center', 
+        marginTop: 20,
+        width: '85%', 
+        alignSelf: 'center', 
+    },
+    input: {
+        backgroundColor: '#FFF8E1', 
+        paddingVertical: 15, 
+        paddingHorizontal: 18,
+        borderRadius: 10, 
+        marginBottom: 15,
+        width: '100%', 
+        fontFamily: 'Georgia', 
+        fontSize: 18,
+        borderColor: '#D3A36E', 
+        borderWidth: 2,
+    },
+    input2: {
+        backgroundColor: '#FFF8E1', 
+        paddingVertical: 15, 
+        paddingHorizontal: 18,
+        borderRadius: 10, 
+        marginBottom: 15,
+        width: '100%', 
+        fontFamily: 'Georgia', 
+        fontSize: 18,
+        borderColor: '#D3A36E', 
+        borderWidth: 2,
     },
     titleBody: {
-        fontSize: 17,
+        fontSize: 25, 
         fontWeight: 'bold',
-        color: 'black',
-        textAlign: 'center'
-    },
-    titleBody2: {
-        fontSize: 18,
-        color: 'black',
-        marginTop: 15
+        color: '#9E5A3E', 
+        textAlign: 'center',
+        fontFamily: 'Papyrus', 
+        textShadowColor: '#D28F1D', 
+        textShadowOffset: { width: 3, height: 3 },
+        textShadowRadius: 10,
     },
     descriptionBody: {
-        fontSize: 15,
-        textAlign: 'center'
+        fontSize: 18,
+        color: '#6F4F30', 
+        fontFamily: 'Georgia', 
+        textAlign: 'center',
+        marginTop: 10,
     },
     btn: {
-        marginTop: 20,
-        textAlign: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        backgroundColor: '#90e683',
-        paddingVertical: 15,
-        width: '60%',
-        borderRadius: 20
+        backgroundColor: '#FFF8E1', 
+        paddingVertical: 5, 
+        paddingHorizontal: 18,
+        borderRadius: 0, 
+        marginBottom: 15,
+        width: '100%', 
+        fontFamily: 'Georgia', 
+        fontSize: 18,
+        borderColor: '#D3A36E', 
+        borderWidth: 2,
     },
-    container: {
-        color: '#235f52'
-    }
-})
+    btnText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#fff',
+        fontFamily: 'Arial', 
+    },
+    smallText: {
+        fontSize: 12,
+        color: '#9E5A3E', 
+        marginTop: 10,
+        textAlign: 'center',
+        fontFamily: 'Georgia', 
+    },
+});

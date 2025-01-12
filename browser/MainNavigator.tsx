@@ -6,14 +6,44 @@ import WelcomenScreen from "../screens/WelcomenScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
 import Juego from "../screens/Juego";
-import ScoreScreen from "../screens/ScoreScreen";
+import Juego2 from "../screens/Juego2";
+import { ScoresScreen } from "../screens/ScoreScreen";
+import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from "react-native";
+import Integrante from "../screens/Integrante";
+import JuegoPoker from "../screens/Juego3";
+
+
 
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
     return (
         <Tab.Navigator>
-            <Tab.Screen name="Juego" component={Juego} options={{ headerShown: false }} />
+            <Tab.Screen
+                name="Juego"
+                component={JuegoPoker}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: () => (
+                        <View>
+                            <Text>🎮</Text>
+                        </View>
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Integrantes"
+                component={Integrante}
+                options={{
+                    headerShown: false,
+                    tabBarIcon: () => (
+                        <View>
+                            <Text>👥</Text>
+                        </View>
+                    ),
+                }}
+            />
         </Tab.Navigator>
     );
 }
@@ -45,7 +75,7 @@ function MyStack() {
             />
             <Stack.Screen
                 name="ScoreScreen"
-                component={ScoreScreen}
+                component={ScoresScreen}
                 options={{ headerShown: false }}
             />
         </Stack.Navigator>
