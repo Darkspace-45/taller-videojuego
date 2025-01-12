@@ -5,22 +5,14 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import Card from "../components/Card";
 import { db } from '../config/Config';
-import { ref, set } from 'firebase/database';
+import { ref, set } from 'firebase/database'; 
 
 const doomCards: string[] = [
-    "🐷",
-    "🪝",
-    "⚛️",
-    "🔑",
-    "🥕",
-    "🥑",
-    "🐷",
-    "🪝",
-    "⚛️",
-    "🔑",
-    "🥕",
-    "🥑",
+    "🕹️", "💀", "🔫", "🩸", "🔥", "👾",
+    "🕹️", "💀", "🔫", "🩸", "🔥", "👾",
+    "⚔️", "⚔️", "💣", "💣"
 ];
+
 
 type RootStackParamList = {
     JuegoDoom: undefined;
@@ -93,11 +85,11 @@ export default function JuegoDoom() {
     };
 
     const { width } = Dimensions.get("window");
-    const cardSize = width / 4 - 5; 
+    const cardSize = width / 5 - 12;
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Memory</Text>
+            <Text style={styles.title}>Memory Doom</Text>
             <Text style={styles.title}>Score: {score}</Text>
             <Text style={styles.title}>Tiempo restante: {timeLeft}s</Text>
             <View style={[styles.board, { paddingHorizontal: cardSize / 5 }]}>
@@ -111,7 +103,7 @@ export default function JuegoDoom() {
                             onPress={() => handleTapCard(index)}
                             style={{ width: cardSize, height: cardSize }}
                         >
-                            {isTurnedOver ? card : "❓"}
+                            {card}
                         </Card>
                     );
                 })}

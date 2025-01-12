@@ -5,36 +5,32 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import Card from "../components/Card";
 import { db } from '../config/Config';
-import { ref, set } from 'firebase/database';
+import { ref, set } from 'firebase/database'; 
 
-const doomCards: string[] = [
-    "🐷",
-    "🪝",
-    "⚛️",
-    "🔑",
-    "🥕",
-    "🥑",
-    "🐷",
-    "🪝",
-    "⚛️",
-    "🔑",
-    "🥕",
-    "🥑",
+const pokerCards: string[] = [
+    "A♥", "A♦", "A♣", "A♠",
+    "2♥", "2♦", "2♣", "2♠",
+    "3♥", "3♦", "3♣", "3♠",
+    "4♥", "4♦", "4♣", "4♠",
+    "5♥", "5♦", "5♣", "5♠",
 ];
 
+// Duplicar las cartas y mezclarlas
+const duplicatedPokerCards = shuffle([...pokerCards, ...pokerCards.slice(0, 24)]);
+
 type RootStackParamList = {
-    JuegoDoom: undefined;
+    JuegoPoker: undefined;
     ScoreScreen: { score: number };
 };
 
-export default function JuegoDoom() {
-    const [board, setBoard] = React.useState<string[]>(() => shuffle([...doomCards]));
+export default function JuegoPoker() {
+    const [board, setBoard] = React.useState<string[]>(() => shuffle([...duplicatedPokerCards]));
     const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
     const [score, setScore] = React.useState<number>(0);
-    const [timeLeft, setTimeLeft] = React.useState<number>(90); // Tiempo inicial en segundos
+    const [timeLeft, setTimeLeft] = React.useState<number>(120); // Tiempo inicial en segundos
 
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'JuegoDoom'>>();
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'JuegoPoker'>>();
 
     useEffect(() => {
         if (timeLeft === 0) {
@@ -54,8 +50,8 @@ export default function JuegoDoom() {
 
         if (board[selectedCards[0]] === board[selectedCards[1]]) {
             setMatchedCards((prev) => [...prev, ...selectedCards]);
-            setScore((prev) => prev + 20);
-            setTimeLeft((prev) => prev + 5);
+            setScore((prev) => prev + 50);
+            setTimeLeft((prev) => prev + 10);
             setSelectedCards([]);
         } else {
             const timeoutId = setTimeout(() => setSelectedCards([]), 1000);
@@ -64,8 +60,8 @@ export default function JuegoDoom() {
     }, [selectedCards, board]);
 
     useEffect(() => {
-        if (matchedCards.length === board.length) {
-            setTimeLeft((prev) => prev + 15);
+        if (matchedCards.length === 30) {
+            setTimeLeft((prev) => prev + 30);
             resetGame();
         }
     }, [matchedCards]);
@@ -80,7 +76,7 @@ export default function JuegoDoom() {
     };
 
     const resetGame = (): void => {
-        setBoard(shuffle([...doomCards]));
+        setBoard(shuffle([...duplicatedPokerCards]));
         setSelectedCards([]);
         setMatchedCards([]);
     };
@@ -93,11 +89,11 @@ export default function JuegoDoom() {
     };
 
     const { width } = Dimensions.get("window");
-    const cardSize = width / 4 - 5; 
+    const cardSize = width / 6 - 10;
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Memory</Text>
+            <Text style={styles.title}>Memory Poker</Text>
             <Text style={styles.title}>Score: {score}</Text>
             <Text style={styles.title}>Tiempo restante: {timeLeft}s</Text>
             <View style={[styles.board, { paddingHorizontal: cardSize / 5 }]}>
@@ -111,7 +107,7 @@ export default function JuegoDoom() {
                             onPress={() => handleTapCard(index)}
                             style={{ width: cardSize, height: cardSize }}
                         >
-                            {isTurnedOver ? card : "❓"}
+                            {card}
                         </Card>
                     );
                 })}

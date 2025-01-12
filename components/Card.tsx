@@ -1,52 +1,41 @@
-import * as React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet, ViewStyle } from "react-native";
 
 interface CardProps {
-    onPress: () => void;
     isTurnedOver: boolean;
+    onPress: () => void;
     children: React.ReactNode;
+    style?: ViewStyle; // Asegúrate de que acepta la prop `style`
 }
 
-export default function Card({ onPress, isTurnedOver, children }: CardProps) {
+const Card: React.FC<CardProps> = ({ isTurnedOver, onPress, children, style }) => {
     return (
-        <Pressable
-            style={isTurnedOver ? styles.cardUp : styles.cardDown}
+        <TouchableOpacity
+            style={[styles.card, style, isTurnedOver && styles.turnedOver]}
             onPress={onPress}
         >
-            {isTurnedOver ? (
-                <Text style={styles.text}>{children}</Text>
-            ) : (
-                <Text style={styles.text}>?</Text>
-            )}
-        </Pressable>
+            <Text style={styles.text}>
+                {isTurnedOver ? children : "?"}
+            </Text>
+        </TouchableOpacity>
     );
-}
+};
 
 const styles = StyleSheet.create({
-    cardUp: {
-        width: 100,
-        height: 100,
-        margin: 10,
-        borderColor: "#334155",
-        borderWidth: 2,
-        borderRadius: 12,
-        alignItems: "center",
-        justifyContent: "center",
+    card: {
         backgroundColor: "#1e293b",
+        borderRadius: 8,
+        margin: 5,
+        justifyContent: "center",
+        alignItems: "center",
     },
-    cardDown: {
-        width: 100,
-        height: 100,
-        margin: 10,
-        borderWidth: 10,
-        borderColor: "#334155",
-        borderRadius: 12,
-        backgroundColor: "#1e293b",
-        alignItems: "center",
-        justifyContent: "center",
+    turnedOver: {
+        backgroundColor: "#f87171",
     },
     text: {
-        fontSize: 46,
-        color: "#334155",
+        fontSize: 24,
+        color: "white",
     },
 });
+
+export default Card;

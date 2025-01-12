@@ -6,10 +6,12 @@ import WelcomenScreen from "../screens/WelcomenScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
 import Juego from "../screens/Juego";
+import Juego2 from "../screens/Juego2";
 import { ScoresScreen } from "../screens/ScoreScreen";
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from "react-native";
 import Integrante from "../screens/Integrante";
+import JuegoPoker from "../screens/Juego3";
 
 
 
@@ -20,7 +22,7 @@ function MyTabs() {
         <Tab.Navigator>
             <Tab.Screen
                 name="Juego"
-                component={Juego}
+                component={JuegoPoker}
                 options={{
                     headerShown: false,
                     tabBarIcon: () => (
