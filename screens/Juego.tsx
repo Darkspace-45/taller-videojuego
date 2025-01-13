@@ -4,8 +4,8 @@ import { SafeAreaView, StyleSheet, Text, View, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import Card from "../components/Card";
-import { db } from '../config/Config';
-import { ref, set } from 'firebase/database';
+import { auth, db } from '../config/Config';
+import { get, ref, set } from 'firebase/database';
 
 const doomCards: string[] = [
     "🐷",
@@ -27,14 +27,15 @@ type RootStackParamList = {
     ScoreScreen: { score: number };
 };
 
-export default function JuegoDoom() {
+export default function JuegoMemory() {
     const [board, setBoard] = React.useState<string[]>(() => shuffle([...doomCards]));
     const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
     const [score, setScore] = React.useState<number>(0);
-    const [timeLeft, setTimeLeft] = React.useState<number>(90); // Tiempo inicial en segundos
+    const [timeLeft, setTimeLeft] = React.useState<number>(40); // Tiempo inicial en segundos
 
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'JuegoDoom'>>();
+    const user = auth.currentUser;
 
     useEffect(() => {
         if (timeLeft === 0) {
@@ -55,7 +56,7 @@ export default function JuegoDoom() {
         if (board[selectedCards[0]] === board[selectedCards[1]]) {
             setMatchedCards((prev) => [...prev, ...selectedCards]);
             setScore((prev) => prev + 20);
-            setTimeLeft((prev) => prev + 5);
+            setTimeLeft((prev) => prev + 2);
             setSelectedCards([]);
         } else {
             const timeoutId = setTimeout(() => setSelectedCards([]), 1000);
@@ -65,7 +66,7 @@ export default function JuegoDoom() {
 
     useEffect(() => {
         if (matchedCards.length === board.length) {
-            setTimeLeft((prev) => prev + 15);
+            setTimeLeft((prev) => prev + 5);
             resetGame();
         }
     }, [matchedCards]);
@@ -85,15 +86,54 @@ export default function JuegoDoom() {
         setMatchedCards([]);
     };
 
-    const saveScore = async () => {
-        await set(ref(db, 'scores'), {
-            score: score,
-            timestamp: new Date().toISOString(),
-        });
+    interface Score {
+        score: number;
+        username: string;
+    }
+
+    const saveScore = async (
+        user: { uid: string; nombre: string },
+        score: number,
+        db: any
+    ): Promise<void> => {
+        if (user && user.uid && user.nombre) {
+            const userId = user.uid;
+            const scoresRef = ref(db, users / ${ userId } / scores);
+            const scoresSnapshot = await get(scoresRef);
+
+            // Verificar si los datos obtenidos son un arreglo
+            let scoresData: Score[] = scoresSnapshot.val() || [];
+            if (!Array.isArray(scoresData)) {
+                scoresData = [];
+            }
+
+            // Agregar el nuevo puntaje al arreglo
+            scoresData.push({
+                score: score,
+                username: user.nombre,
+            });
+
+            // Guardar los puntajes actualizados
+            await set(scoresRef, scoresData);
+
+            // Verificar si el arreglo tiene elementos antes de reducir
+            const record = scoresData.length > 0
+                ? scoresData.reduce((max, item) =>
+                    item.score > max.score ? item : max
+                )
+                : null;
+
+            // Mostrar el récord en pantalla si existe
+            if (record) {
+                displayRecord(record.username, record.score);
+            }
+        } else {
+            console.error("Datos de usuario no válidos.");
+        }
     };
 
     const { width } = Dimensions.get("window");
-    const cardSize = width / 4 - 5; 
+    const cardSize = width / 4 - 5;
 
     return (
         <SafeAreaView style={styles.container}>

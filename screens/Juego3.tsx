@@ -28,7 +28,7 @@ export default function JuegoPoker() {
     const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
     const [score, setScore] = React.useState<number>(0);
-    const [timeLeft, setTimeLeft] = React.useState<number>(120); // Tiempo inicial en segundos
+    const [timeLeft, setTimeLeft] = React.useState<number>(100); // Tiempo inicial en segundos
 
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'JuegoPoker'>>();
 

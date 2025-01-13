@@ -3,14 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-type RootStackParamList = {
-    JuegoDoom: undefined;
-    JuegoPoker: undefined;
-    JuegoMemory: undefined;
-};
 
-const Dificultad = () => {
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+const Dificultad = ( { navigation }: any) => {
 
     return (
         <View style={styles.container}>
@@ -18,21 +13,21 @@ const Dificultad = () => {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate("JuegoDoom")}
+                onPress={() => navigation.navigate('JuegoM')}
             >
-                <Text style={styles.buttonText}>Doom (Fácil)</Text>
+                <Text style={styles.buttonText}>Memory (Fácil)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate("JuegoMemory")}
+                onPress={() => navigation.navigate('JuegoD')}
             >
-                <Text style={styles.buttonText}>Memory (Intermedio)</Text>
+                <Text style={styles.buttonText}>Doom (Intermedio)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate("JuegoPoker")}
+                onPress={() => navigation.navigate('JuegoP')}
             >
                 <Text style={styles.buttonText}>Poker (Difícil)</Text>
             </TouchableOpacity>

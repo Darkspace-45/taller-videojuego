@@ -5,13 +5,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomenScreen from "../screens/WelcomenScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
-import Juego from "../screens/Juego";
-import Juego2 from "../screens/Juego2";
 import { ScoresScreen } from "../screens/ScoreScreen";
-import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from "react-native";
 import Integrante from "../screens/Integrante";
 import JuegoPoker from "../screens/Juego3";
+import Dificultad from "../screens/Dificultad";
+import JuegoMemory from "../screens/Juego";
+import JuegoDoom from "../screens/Juego2";
 
 
 
@@ -20,18 +20,6 @@ const Tab = createBottomTabNavigator();
 function MyTabs() {
     return (
         <Tab.Navigator>
-            <Tab.Screen
-                name="Juego"
-                component={JuegoPoker}
-                options={{
-                    headerShown: false,
-                    tabBarIcon: () => (
-                        <View>
-                            <Text>🎮</Text>
-                        </View>
-                    ),
-                }}
-            />
             <Tab.Screen
                 name="Integrantes"
                 component={Integrante}
@@ -69,14 +57,35 @@ function MyStack() {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name="Juego"
-                component={MyTabs}
+                name='dificultad'
+                component={Dificultad}
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name="JuegoM"
+                component={JuegoMemory}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="JuegoD"
+                component={JuegoDoom}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="JuegoP"
+                component={JuegoPoker}
+                options={{ headerShown: false }}
+            />
+
             <Stack.Screen
                 name="ScoreScreen"
                 component={ScoresScreen}
                 options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="Integrantes"
+                component={MyTabs}
             />
         </Stack.Navigator>
     );

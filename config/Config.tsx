@@ -23,9 +23,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getDatabase();
-export const dbs = getFirestore();
 export const auth = getAuth();
-const scoresCollection = collection(dbs, 'scores');
+
 
 
 

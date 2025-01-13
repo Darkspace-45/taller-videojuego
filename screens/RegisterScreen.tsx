@@ -4,7 +4,8 @@ import { BodyComponent } from '../components/BodyComponent';
 import { TitleComponent } from '../components/title';
 import { INPUT_COLOR } from '../commons/constans';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/Config';
+import { auth, db } from '../config/Config';
+import { ref, set } from 'firebase/database';
 
 export default function RegisterScreen({ navigation }: any) {
   const [nombre, setNombre] = useState("");
@@ -23,6 +24,11 @@ export default function RegisterScreen({ navigation }: any) {
     createUserWithEmailAndPassword(auth, correo, contraseña)
       .then((userCredential) => {
         const user = userCredential.user;
+        set(ref(db, 'usuarios/' + nombre), {
+          apellido: apellido,
+          correo: correo,
+          edad: edad,
+        });
         Alert.alert('Registro exitoso', 'Usuario registrado correctamente.');
         navigation.navigate('Login');
       })

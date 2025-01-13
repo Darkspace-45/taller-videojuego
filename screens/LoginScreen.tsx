@@ -34,7 +34,7 @@ export default function LoginScreen({ navigation }: any) {
                 // Signed in 
                 const user = userCredential.user;
                 console.log(user);
-                navigation.navigate('Juego');
+                navigation.navigate('dificultad');
             })
             .catch((error) => {
                 const errorCode = error.code;
