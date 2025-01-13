@@ -5,13 +5,17 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomenScreen from "../screens/WelcomenScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
-import { ScoresScreen } from "../screens/ScoreScreen";
+
 import { Text, View } from "react-native";
 import Integrante from "../screens/Integrante";
 import JuegoPoker from "../screens/Juego3";
 import Dificultad from "../screens/Dificultad";
 import JuegoMemory from "../screens/Juego";
 import JuegoDoom from "../screens/Juego2";
+import Restablecer from "../screens/Restablecer";
+import ScoreScreen from "../screens/ScoreScreen";
+import PerfilScreen from "../screens/PerfilScreen";
+
 
 
 
@@ -21,13 +25,34 @@ function MyTabs() {
     return (
         <Tab.Navigator>
             <Tab.Screen
+                name="Score"
+                component={ScoreScreen}
+                options={{
+                    tabBarIcon: () => (
+                        <View>
+                            <Text>🏆</Text>
+                        </View>
+                    ),
+                }}
+            />
+            <Tab.Screen
                 name="Integrantes"
                 component={Integrante}
                 options={{
-                    headerShown: false,
                     tabBarIcon: () => (
                         <View>
                             <Text>👥</Text>
+                        </View>
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name = "Perfil"
+                component={PerfilScreen}
+                options={{
+                    tabBarIcon: () => (
+                        <View>
+                            <Text>👤</Text>
                         </View>
                     ),
                 }}
@@ -78,13 +103,13 @@ function MyStack() {
             />
 
             <Stack.Screen
-                name="ScoreScreen"
-                component={ScoresScreen}
+                name="Restablecer"
+                component={Restablecer}
                 options={{ headerShown: false }}
             />
 
             <Stack.Screen
-                name="Integrantes"
+                name="Tabs"
                 component={MyTabs}
             />
         </Stack.Navigator>

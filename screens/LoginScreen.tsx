@@ -117,6 +117,11 @@ export default function LoginScreen({ navigation }: any) {
                         secureTextEntry={true}
                     />
                 </View>
+                <View>
+                    <TouchableOpacity onPress={() => navigation.navigate('Restablecer')}>
+                        <Text style={styles.restableco}>¿Olvidaste tu contraseña?</Text>
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity style={styles.btn} onPress={() => login()}>
                     <Text style={styles.titleBody}>Iniciar Sesión</Text>
                 </TouchableOpacity>
@@ -218,4 +223,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontFamily: 'Georgia', 
     },
+    restableco:{
+        fontSize: 16,
+        color: '#ee1133',
+        textDecorationLine: 'underline',
+    }
 });

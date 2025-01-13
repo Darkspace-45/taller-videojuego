@@ -2,54 +2,39 @@ import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, Text, View, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from '@react-navigation/stack';
+import { StackNavigationProp } from "@react-navigation/stack";
 import Card from "../components/Card";
-import { auth, db } from '../config/Config';
-import { get, ref, set } from 'firebase/database';
+import { auth, db } from "../config/Config";
+import { get, ref, set } from "firebase/database";
 
-const doomCards: string[] = [
-    "🐷",
-    "🪝",
-    "⚛️",
-    "🔑",
-    "🥕",
-    "🥑",
-    "🐷",
-    "🪝",
-    "⚛️",
-    "🔑",
-    "🥕",
-    "🥑",
-];
+const doomCards = ["🐷", "🪝", "⚛️", "🔑", "🥕", "🥑", "🐷", "🪝", "⚛️", "🔑", "🥕", "🥑"];
 
 type RootStackParamList = {
     JuegoDoom: undefined;
     ScoreScreen: { score: number };
 };
 
-export default function JuegoMemory() {
-    const [board, setBoard] = React.useState<string[]>(() => shuffle([...doomCards]));
+export default function JuegoMemory( {navigation}: any) {
+    const [board, setBoard] = React.useState(() => shuffle([...doomCards]));
     const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
-    const [score, setScore] = React.useState<number>(0);
-    const [timeLeft, setTimeLeft] = React.useState<number>(40); // Tiempo inicial en segundos
+    const [score, setScore] = React.useState(0);
+    const [timeLeft, setTimeLeft] = React.useState(40);
 
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'JuegoDoom'>>();
     const user = auth.currentUser;
 
+    // Timer para el juego
     useEffect(() => {
-        if (timeLeft === 0) {
-            navigation.navigate("ScoreScreen", { score });
+        if (timeLeft <= 0) {
+            navigation.navigate('Tabs');
             return;
         }
 
-        const timerId = setInterval(() => {
-            setTimeLeft((prev) => prev - 1);
-        }, 1000);
-
+        const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
         return () => clearInterval(timerId);
     }, [timeLeft, score, navigation]);
 
+    // Lógica de coincidencia de cartas
     useEffect(() => {
         if (selectedCards.length < 2) return;
 
@@ -57,19 +42,32 @@ export default function JuegoMemory() {
             setMatchedCards((prev) => [...prev, ...selectedCards]);
             setScore((prev) => prev + 20);
             setTimeLeft((prev) => prev + 2);
-            setSelectedCards([]);
-        } else {
-            const timeoutId = setTimeout(() => setSelectedCards([]), 1000);
-            return () => clearTimeout(timeoutId);
         }
+
+        const timeoutId = setTimeout(() => setSelectedCards([]), 1000);
+        return () => clearTimeout(timeoutId);
     }, [selectedCards, board]);
 
+    // Reinicia el juego si todas las cartas coinciden
     useEffect(() => {
         if (matchedCards.length === board.length) {
             setTimeLeft((prev) => prev + 5);
             resetGame();
         }
     }, [matchedCards]);
+
+    // Guarda el puntaje en Firebase
+    const saveScore = async (): Promise<void> => {
+        if (user && user.uid) {
+            const scoresRef = ref(db, `users/${user.uid}/score`);
+            const snapshot = await get(scoresRef);
+
+            const currentScore = snapshot.val() || 0;
+            const newScore = Math.max(currentScore, score);
+
+            await set(scoresRef, newScore);
+        }
+    };
 
     useEffect(() => {
         saveScore();
@@ -86,52 +84,6 @@ export default function JuegoMemory() {
         setMatchedCards([]);
     };
 
-    interface Score {
-        score: number;
-        username: string;
-    }
-
-    const saveScore = async (
-        user: { uid: string; nombre: string },
-        score: number,
-        db: any
-    ): Promise<void> => {
-        if (user && user.uid && user.nombre) {
-            const userId = user.uid;
-            const scoresRef = ref(db, users / ${ userId } / scores);
-            const scoresSnapshot = await get(scoresRef);
-
-            // Verificar si los datos obtenidos son un arreglo
-            let scoresData: Score[] = scoresSnapshot.val() || [];
-            if (!Array.isArray(scoresData)) {
-                scoresData = [];
-            }
-
-            // Agregar el nuevo puntaje al arreglo
-            scoresData.push({
-                score: score,
-                username: user.nombre,
-            });
-
-            // Guardar los puntajes actualizados
-            await set(scoresRef, scoresData);
-
-            // Verificar si el arreglo tiene elementos antes de reducir
-            const record = scoresData.length > 0
-                ? scoresData.reduce((max, item) =>
-                    item.score > max.score ? item : max
-                )
-                : null;
-
-            // Mostrar el récord en pantalla si existe
-            if (record) {
-                displayRecord(record.username, record.score);
-            }
-        } else {
-            console.error("Datos de usuario no válidos.");
-        }
-    };
-
     const { width } = Dimensions.get("window");
     const cardSize = width / 4 - 5;
 
@@ -142,8 +94,7 @@ export default function JuegoMemory() {
             <Text style={styles.title}>Tiempo restante: {timeLeft}s</Text>
             <View style={[styles.board, { paddingHorizontal: cardSize / 5 }]}>
                 {board.map((card, index) => {
-                    const isTurnedOver =
-                        selectedCards.includes(index) || matchedCards.includes(index);
+                    const isTurnedOver = selectedCards.includes(index) || matchedCards.includes(index);
                     return (
                         <Card
                             key={index}
@@ -180,6 +131,11 @@ const styles = StyleSheet.create({
         marginVertical: 15,
     },
 });
+
+interface Score {
+    score: number;
+    username: string;
+}
 
 function shuffle<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
