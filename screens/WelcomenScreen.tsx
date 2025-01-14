@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   textBox: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semitransparente.
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Fondo semitransparente.
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,

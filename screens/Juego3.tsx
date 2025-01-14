@@ -6,6 +6,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import Card from "../components/Card";
 import { auth, db } from "../config/Config";
 import { get, ref, set } from "firebase/database";
+import Card2 from "../components/Card2";
 
 const pokerCards: string[] = [
     "A♥", "A♦", "A♣", "A♠",
@@ -107,14 +108,14 @@ export default function JuegoPoker() {
                     const isTurnedOver =
                         selectedCards.includes(index) || matchedCards.includes(index);
                     return (
-                        <Card
+                        <Card2
                             key={index}
                             isTurnedOver={isTurnedOver}
                             onPress={() => handleTapCard(index)}
                             style={{ width: cardSize, height: cardSize }}
                         >
                             {card}
-                        </Card>
+                        </Card2>
                     );
                 })}
             </View>

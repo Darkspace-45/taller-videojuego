@@ -8,7 +8,7 @@ interface CardProps {
     style?: ViewStyle; // Asegúrate de que acepta la prop `style`
 }
 
-const Card: React.FC<CardProps> = ({ isTurnedOver, onPress, children, style }) => {
+const Card2: React.FC<CardProps> = ({ isTurnedOver, onPress, children, style }) => {
     return (
         <TouchableOpacity
             style={[styles.card, style, isTurnedOver && styles.turnedOver]}
@@ -33,9 +33,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#f87171",
     },
     text: {
-        fontSize: 40,
+        fontSize: 25,
         color: "white",
     },
 });
 
-export default Card;
+export default Card2;
