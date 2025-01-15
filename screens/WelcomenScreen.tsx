@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     textShadowColor: '#000',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semitransparente.
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Fondo semitransparente.
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 0,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline', // Subrayado para resaltar como un enlace.
     paddingHorizontal: 10,
     paddingVertical: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semitransparente.
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Fondo semitransparente.
     borderRadius: 0,
     textAlign: 'center',
   },

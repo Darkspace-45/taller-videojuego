@@ -1,16 +1,17 @@
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet, Text, View, Dimensions } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, Dimensions, ImageBackground } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import Card from "../components/Card";
 import { auth, db } from "../config/Config";
 import { get, ref, set } from "firebase/database";
+import Card from "../components/Card";
+import { useFonts } from "expo-font"; // Asegúrate de importar useFonts para cargar la fuente
 
 const doomCards: string[] = [
-    "🕹️", "💀", "🔫", "🩸", "🔥", "👾",
-    "🕹️", "💀", "🔫", "🩸", "🔥", "👾",
-    "⚔️", "⚔️", "💣", "💣"
+    "☣️", "☠️", "🔫", "🩸", "🔥", "😈",
+    "☣️", "☠️", "🔫", "🩸", "🔥", "😈",
+    "⚔️", "⚔️", "🦂", "🦂"
 ];
 
 type RootStackParamList = {
@@ -19,9 +20,14 @@ type RootStackParamList = {
 };
 
 export default function JuegoDoom() {
+    const [fontsLoaded] = useFonts({
+        Memoria: require("../assets/fonts/AmazDooMLeft.ttf"),
+    });
+
     const [board, setBoard] = React.useState<string[]>(() => shuffle([...doomCards]));
     const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
+    const [incorrectCards, setIncorrectCards] = React.useState<number[]>([]); // Para cartas incorrectas
     const [score, setScore] = React.useState<number>(0);
     const [timeLeft, setTimeLeft] = React.useState<number>(50); // Tiempo inicial en segundos
 
@@ -46,17 +52,23 @@ export default function JuegoDoom() {
         if (board[selectedCards[0]] === board[selectedCards[1]]) {
             setMatchedCards((prev) => [...prev, ...selectedCards]);
             setScore((prev) => prev + 20);
-            setTimeLeft((prev) => prev + 4);  
+            setTimeLeft((prev) => prev + 4);
+        } else {
+            setIncorrectCards((prev) => [...prev, ...selectedCards]); // Agregar a las cartas incorrectas
         }
 
-        const timeoutId = setTimeout(() => setSelectedCards([]), 1000);
+        const timeoutId = setTimeout(() => {
+            setSelectedCards([]);
+            setIncorrectCards([]); // Limpiar las cartas incorrectas después de un breve delay
+        }, 1000);
+
         return () => clearTimeout(timeoutId);
     }, [selectedCards, board]);
 
     // Reinicia el juego si todas las cartas coinciden
     useEffect(() => {
         if (matchedCards.length === board.length) {
-            setTimeLeft((prev) => prev + 8); 
+            setTimeLeft((prev) => prev + 8);
             resetGame();
         }
     }, [matchedCards]);
@@ -92,21 +104,47 @@ export default function JuegoDoom() {
     const { width } = Dimensions.get("window");
     const cardSize = width / 5 - 12;
 
+    if (!fontsLoaded) {
+        return <Text>Cargando fuentes...</Text>; // Muestra un mensaje mientras las fuentes cargan
+    }
+
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Memory Doom</Text>
-            <Text style={styles.title}>Score: {score}</Text>
-            <Text style={styles.title}>Tiempo restante: {timeLeft}s</Text>
+        <ImageBackground source={require("../assets/img/Iconos.jpg")} style={styles.container}>
+            <View style={styles.headerContainer}>
+                <Text style={styles.title}>DOOM Memory</Text>
+                <Text style={styles.title}>Score: {score}</Text>
+                <View style={styles.timeContainer}>
+                    <Text style={styles.title}>Tiempo restante: </Text>
+                    <Text style={[styles.time, timeLeft <= 10 && styles.timeLow]}>{timeLeft}s</Text>
+                </View>
+            </View>
             <View style={[styles.board, { paddingHorizontal: cardSize / 5 }]}>
                 {board.map((card, index) => {
-                    const isTurnedOver =
-                        selectedCards.includes(index) || matchedCards.includes(index);
+                    const isTurnedOver = selectedCards.includes(index) || matchedCards.includes(index);
+                    const isMatched = matchedCards.includes(index);
+                    const isIncorrect = incorrectCards.includes(index); // Verifica si es incorrecta
+                    let borderColor = "white"; // Color por defecto
+
+                    // Si la carta está emparejada, poner verde
+                    if (isMatched) {
+                        borderColor = "green";
+                    }
+                    // Si las dos cartas son incorrectas, poner rojo
+                    if (isIncorrect && !isMatched) {
+                        borderColor = "red";
+                    }
+
                     return (
                         <Card
                             key={index}
                             isTurnedOver={isTurnedOver}
                             onPress={() => handleTapCard(index)}
-                            style={{ width: cardSize, height: cardSize }}
+                            style={{
+                                width: cardSize,
+                                height: cardSize,
+                                ...styles.card,
+                                borderColor: borderColor, // Cambiar color del borde
+                            }}
                         >
                             {isTurnedOver ? card : "❓"}
                         </Card>
@@ -114,27 +152,61 @@ export default function JuegoDoom() {
                 })}
             </View>
             <StatusBar style="light" />
-        </SafeAreaView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#0f172a",
         alignItems: "center",
         justifyContent: "center",
+        backgroundColor: "#0f172a",
+    },
+    headerContainer: {
+        backgroundColor: "rgba(0,0,0,0.6)",
+        padding: 10,
+        borderRadius: 10,
+        marginBottom: 20,
+    },
+    title: {
+        fontFamily: "Doom", // Fuente específica para el botón de "Doom"
+        fontSize: 56,
+        color: "#FFFF",
+        textAlign: "center",
+        textShadowColor: "#000",
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
+    },
+    timeContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    time: {
+        fontFamily: "Doom", // Fuente específica para el botón de "Doom"
+        fontSize: 56,
+        color: "#FFFF",
+        textAlign: "center",
+        textShadowColor: "#000",
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 4,
+    },
+    timeLow: {
+        color: "red",
     },
     board: {
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "center",
     },
-    title: {
-        fontSize: 32,
-        fontWeight: "900",
-        color: "snow",
-        marginVertical: 15,
+    card: {
+        margin: 5,
+        borderWidth: 4,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#1e293b",
+        borderRadius: 5,
     },
 });
 
