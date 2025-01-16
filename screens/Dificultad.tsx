@@ -13,63 +13,80 @@ export default function Dificultad({ navigation }: any) {
     const [rotationLeft] = useState(new Animated.Value(0));
     const [rotationRight] = useState(new Animated.Value(0));
 
+    // Estados para manejar el cambio de color
+    const retroColors = ["#FFD700", "#FF4500", "#32CD32", "#1E90FF", "#FF69B4"]; // Colores retro
+    const [colorIndex, setColorIndex] = useState(0);
+
     useEffect(() => {
-        // Rotación de la imagen de la izquierda (gira a la derecha)
+        // Cambiar color cada 500 ms
+        const colorInterval = setInterval(() => {
+            setColorIndex((prevIndex) => (prevIndex + 1) % retroColors.length);
+        }, 500);
+
+        return () => clearInterval(colorInterval); // Limpiar intervalo al desmontar componente
+    }, []);
+
+    useEffect(() => {
         Animated.loop(
             Animated.sequence([
                 Animated.timing(rotationLeft, {
                     toValue: 1,
-                    duration: 3000, // Duración de la rotación (puedes ajustarla)
+                    duration: 3000,
                     useNativeDriver: true,
                 }),
                 Animated.timing(rotationLeft, {
                     toValue: 0,
-                    duration: 3000, // Duración de la rotación (puedes ajustarla)
+                    duration: 3000,
                     useNativeDriver: true,
                 }),
             ])
         ).start();
 
-        // Rotación de la imagen de la derecha (gira a la izquierda)
         Animated.loop(
             Animated.sequence([
                 Animated.timing(rotationRight, {
                     toValue: 1,
-                    duration: 3000, // Duración de la rotación (puedes ajustarla)
+                    duration: 3000,
                     useNativeDriver: true,
                 }),
                 Animated.timing(rotationRight, {
                     toValue: 0,
-                    duration: 3000, // Duración de la rotación (puedes ajustarla)
+                    duration: 3000,
                     useNativeDriver: true,
                 }),
             ])
         ).start();
     }, []);
 
-    // Interpolación para los ángulos de rotación
     const rotateInterpolationLeft = rotationLeft.interpolate({
         inputRange: [0, 2],
-        outputRange: ["0deg", "360deg"], // Rotación de 0 a 180 grados hacia la derecha
+        outputRange: ["0deg", "360deg"],
     });
 
     const rotateInterpolationRight = rotationRight.interpolate({
         inputRange: [0, 2],
-        outputRange: ["0deg", "-360deg"], // Rotación de 0 a -180 grados hacia la izquierda
+        outputRange: ["0deg", "-360deg"],
     });
 
     if (!fontsLoaded) {
-        return <Text>Cargando fuentes...</Text>; // Muestra un mensaje mientras las fuentes cargan
+        return <Text>Cargando fuentes...</Text>;
     }
 
     return (
         <ImageBackground
-            source={require("../assets/img/videojuego.gif")} // Ruta a tu imagen de fondo
+            source={require("../assets/img/videojuego.gif")}
             style={styles.background}
         >
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.title1}>Selecciona una dificultad</Text>
+                    <Text
+                        style={[
+                            styles.title1,
+                            { color: retroColors[colorIndex] }, // Cambia dinámicamente el color
+                        ]}
+                    >
+                        SELECCIONE DIFICULTAD
+                    </Text>
                 </View>
 
                 <TouchableOpacity
@@ -78,12 +95,12 @@ export default function Dificultad({ navigation }: any) {
                 >
                     <Animated.Image
                         source={require("../assets/img/arcada.png")}
-                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationLeft }] }]} // Aplica la rotación al ícono de la izquierda
+                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationLeft }] }]}
                     />
                     <Text style={[styles.title2]}>MEMORY (FÁCIL)</Text>
                     <Animated.Image
                         source={require("../assets/img/arcada.png")}
-                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationRight }] }]} // Aplica la rotación al ícono de la derecha
+                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationRight }] }]}
                     />
                 </TouchableOpacity>
 
@@ -93,12 +110,12 @@ export default function Dificultad({ navigation }: any) {
                 >
                     <Animated.Image
                         source={require("../assets/img/doomskullgif.gif")}
-                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationLeft }] }]} // Aplica la rotación al ícono de la izquierda
+                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationLeft }] }]}
                     />
                     <Text style={[styles.title3]}>Doom (Intermedio)</Text>
                     <Animated.Image
                         source={require("../assets/img/doomskullgif.gif")}
-                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationRight }] }]} // Aplica la rotación al ícono de la derecha
+                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationRight }] }]}
                     />
                 </TouchableOpacity>
 
@@ -108,12 +125,12 @@ export default function Dificultad({ navigation }: any) {
                 >
                     <Animated.Image
                         source={require("../assets/img/cartas-de-poquer.png")}
-                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationLeft }] }]} // Aplica la rotación al ícono de la izquierda
+                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationLeft }] }]}
                     />
                     <Text style={[styles.title4]}>Poker (Difícil)</Text>
                     <Animated.Image
                         source={require("../assets/img/cartas-de-poquer.png")}
-                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationRight }] }]} // Aplica la rotación al ícono de la derecha
+                        style={[styles.iconGif, { transform: [{ rotateY: rotateInterpolationRight }] }]}
                     />
                 </TouchableOpacity>
 
@@ -143,13 +160,14 @@ const styles = StyleSheet.create({
         marginBottom: 30,
     },
     title1: {
-        fontSize: 30,  // Ajusta el tamaño de la fuente según prefieras
-        fontFamily: "Retro",  // Aquí usas el nombre de la fuente personalizada
-        color: "#FFD700",
+        fontSize: 30,
+        fontFamily: "Retro",
         textAlign: "center",
         textShadowColor: "#000",
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 4,
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        padding: 18,
     },
     button: {
         flexDirection: "row",

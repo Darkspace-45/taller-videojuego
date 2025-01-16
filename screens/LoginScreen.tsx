@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View, Animated } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TitleComponent } from '../components/title';
 import { BodyComponent } from '../components/BodyComponent';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -9,47 +9,52 @@ export default function LoginScreen({ navigation }: any) {
     const [correo, setCorreo] = useState("");
     const [contraseña, setContraseña] = useState("");
 
-    // Animaciones
-    const rotateMiddle = new Animated.Value(0); 
+    // Referencia para animaciones
+    const rotateMiddle1 = useRef(new Animated.Value(0)).current;
+    const rotateMiddle2 = useRef(new Animated.Value(0)).current;
+    const rotateMiddle3 = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        
+    // Animación de rotación
+    const startRotation = (rotateAnim: Animated.Value) => {
         Animated.loop(
-            Animated.timing(rotateMiddle, {
+            Animated.timing(rotateAnim, {
                 toValue: 1,
-                duration: 2000, 
-                useNativeDriver: true, 
+                duration: 2000,
+                useNativeDriver: true,
             })
         ).start();
+    };
+
+    useEffect(() => {
+        startRotation(rotateMiddle1);
+        startRotation(rotateMiddle2);
+        startRotation(rotateMiddle3);
     }, []);
 
     function login() {
         if (!correo || !contraseña) {
-            // Validación para campos vacíos
             Alert.alert('Error', 'Por favor ingrese los datos en todos los campos.');
             return;
         }
         signInWithEmailAndPassword(auth, correo, contraseña)
             .then((userCredential) => {
-                // Signed in 
                 const user = userCredential.user;
                 console.log(user);
                 navigation.navigate('dificultad');
             })
             .catch((error) => {
                 const errorCode = error.code;
-                const errorMessage = error.message;
                 let titulo = '';
                 let mensaje = '';
                 if (errorCode === 'auth/invalid-credential') {
                     titulo = 'Credenciales inválidas';
-                    mensaje = 'Las credenciales son incorrectas, Verificar!';
+                    mensaje = 'Las credenciales son incorrectas. Verifique!';
                 } else if (errorCode === 'auth/invalid-email') {
                     titulo = 'Error en el correo electrónico';
-                    mensaje = 'Verificar la dirección de correo electrónico';
+                    mensaje = 'Verifique la dirección de correo electrónico.';
                 } else {
                     titulo = 'Error';
-                    mensaje = 'Verificar correo electrónico y contraseña';
+                    mensaje = 'Verifique correo electrónico y contraseña.';
                 }
                 Alert.alert(titulo, mensaje);
             });
@@ -69,9 +74,9 @@ export default function LoginScreen({ navigation }: any) {
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351196.png" }}
                         style={[styles.img, {
                             transform: [{
-                                rotateY: rotateMiddle.interpolate({
+                                rotateY: rotateMiddle1.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg'] 
+                                    outputRange: ['0deg', '720deg']
                                 })
                             }]
                         }]}
@@ -80,9 +85,9 @@ export default function LoginScreen({ navigation }: any) {
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4614/4614235.png" }}
                         style={[styles.img, {
                             transform: [{
-                                rotateY: rotateMiddle.interpolate({
+                                rotateY: rotateMiddle2.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg'] 
+                                    outputRange: ['0deg', '720deg']
                                 })
                             }]
                         }]}
@@ -91,7 +96,7 @@ export default function LoginScreen({ navigation }: any) {
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351463.png" }}
                         style={[styles.img, {
                             transform: [{
-                                rotateY: rotateMiddle.interpolate({
+                                rotateY: rotateMiddle3.interpolate({
                                     inputRange: [0, 1],
                                     outputRange: ['0deg', '720deg']
                                 })
@@ -133,97 +138,84 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
+        backgroundColor: '#FFFFFF',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     imgContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly', 
+        justifyContent: 'space-evenly',
         alignItems: 'center',
         marginTop: 30,
-        width: '80%', 
+        width: '80%',
     },
     img: {
         width: 110,
         height: 110,
         resizeMode: 'contain',
-        borderRadius: 55, 
+        borderRadius: 55,
     },
     continput: {
-        flexDirection: "column", 
-        alignItems: 'center', 
+        flexDirection: "column",
+        alignItems: 'center',
         marginTop: 20,
-        width: '85%', 
-        alignSelf: 'center', 
+        width: '85%',
+        alignSelf: 'center',
     },
     input: {
-        backgroundColor: '#FFF8E1', 
-        paddingVertical: 15, 
+        backgroundColor: '#FFF8E1',
+        paddingVertical: 15,
         paddingHorizontal: 18,
-        borderRadius: 10, 
+        borderRadius: 10,
         marginBottom: 15,
-        width: '100%', 
-        fontFamily: 'Georgia', 
+        width: '100%',
+        fontFamily: 'Georgia',
         fontSize: 18,
-        borderColor: '#D3A36E', 
+        borderColor: '#D3A36E',
         borderWidth: 2,
     },
     input2: {
-        backgroundColor: '#FFF8E1', 
-        paddingVertical: 15, 
+        backgroundColor: '#FFF8E1',
+        paddingVertical: 15,
         paddingHorizontal: 18,
-        borderRadius: 10, 
+        borderRadius: 10,
         marginBottom: 15,
-        width: '100%', 
-        fontFamily: 'Georgia', 
+        width: '100%',
+        fontFamily: 'Georgia',
         fontSize: 18,
-        borderColor: '#D3A36E', 
+        borderColor: '#D3A36E',
         borderWidth: 2,
     },
     titleBody: {
-        fontSize: 25, 
+        fontSize: 25,
         fontWeight: 'bold',
-        color: '#9E5A3E', 
+        color: '#9E5A3E',
         textAlign: 'center',
-        fontFamily: 'Papyrus', 
-        textShadowColor: '#D28F1D', 
+        fontFamily: 'Papyrus',
+        textShadowColor: '#D28F1D',
         textShadowOffset: { width: 3, height: 3 },
         textShadowRadius: 10,
     },
     descriptionBody: {
         fontSize: 18,
-        color: '#6F4F30', 
-        fontFamily: 'Georgia', 
+        color: '#6F4F30',
+        fontFamily: 'Georgia',
         textAlign: 'center',
         marginTop: 10,
     },
     btn: {
-        backgroundColor: '#FFF8E1', 
-        paddingVertical: 5, 
+        backgroundColor: '#FFF8E1',
+        paddingVertical: 5,
         paddingHorizontal: 18,
-        borderRadius: 0, 
+        borderRadius: 0,
         marginBottom: 15,
-        width: '100%', 
-        fontFamily: 'Georgia', 
+        width: '100%',
+        fontFamily: 'Georgia',
         fontSize: 18,
-        borderColor: '#D3A36E', 
+        borderColor: '#D3A36E',
         borderWidth: 2,
     },
-    btnText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
-        fontFamily: 'Arial', 
-    },
-    smallText: {
-        fontSize: 12,
-        color: '#9E5A3E', 
-        marginTop: 10,
-        textAlign: 'center',
-        fontFamily: 'Georgia', 
-    },
-    restableco:{
+    restableco: {
         fontSize: 16,
         color: '#ee1133',
         textDecorationLine: 'underline',

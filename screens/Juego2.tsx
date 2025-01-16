@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet, Text, View, Dimensions, ImageBackground } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { StyleSheet, Text, View, Dimensions, ImageBackground } from "react-native";
 import { auth, db } from "../config/Config";
 import { get, ref, set } from "firebase/database";
 import Card from "../components/Card";
@@ -19,7 +17,7 @@ type RootStackParamList = {
     ScoreScreen: { score: number };
 };
 
-export default function JuegoDoom() {
+export default function JuegoDoom({ navigation }: any) {
     const [fontsLoaded] = useFonts({
         Memoria: require("../assets/fonts/AmazDooMLeft.ttf"),
     });
@@ -29,15 +27,14 @@ export default function JuegoDoom() {
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
     const [incorrectCards, setIncorrectCards] = React.useState<number[]>([]); // Para cartas incorrectas
     const [score, setScore] = React.useState<number>(0);
-    const [timeLeft, setTimeLeft] = React.useState<number>(50); // Tiempo inicial en segundos
+    const [timeLeft, setTimeLeft] = React.useState<number>(55); // Tiempo inicial en segundos
 
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'JuegoDoom'>>();
     const user = auth.currentUser;
 
     // Timer para el juego
     useEffect(() => {
         if (timeLeft <= 0) {
-            navigation.navigate("ScoreScreen", { score });
+            navigation.navigate('Tabs');
             return;
         }
 
@@ -52,7 +49,7 @@ export default function JuegoDoom() {
         if (board[selectedCards[0]] === board[selectedCards[1]]) {
             setMatchedCards((prev) => [...prev, ...selectedCards]);
             setScore((prev) => prev + 20);
-            setTimeLeft((prev) => prev + 4);
+            setTimeLeft((prev) => prev + 3);
         } else {
             setIncorrectCards((prev) => [...prev, ...selectedCards]); // Agregar a las cartas incorrectas
         }
@@ -104,12 +101,14 @@ export default function JuegoDoom() {
     const { width } = Dimensions.get("window");
     const cardSize = width / 5 - 12;
 
+    ////////
     if (!fontsLoaded) {
         return <Text>Cargando fuentes...</Text>; // Muestra un mensaje mientras las fuentes cargan
     }
+    ////////
 
     return (
-        <ImageBackground source={require("../assets/img/Iconos.jpg")} style={styles.container}>
+        <ImageBackground source={require("../assets/img/FondoDoom.jpg")} style={styles.container}>
             <View style={styles.headerContainer}>
                 <Text style={styles.title}>DOOM Memory</Text>
                 <Text style={styles.title}>Score: {score}</Text>
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#0f172a",
     },
     headerContainer: {
-        backgroundColor: "rgba(0,0,0,0.6)",
+        backgroundColor: "rgba(0,0,0,0.9)",
         padding: 10,
         borderRadius: 10,
         marginBottom: 20,

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet, Text, View, Dimensions, ImageBackground } from "react-native";
+import { StyleSheet, Text, View, Dimensions, ImageBackground } from "react-native";
 import { auth, db } from "../config/Config";
 import { get, ref, set } from "firebase/database";
 import Card from "../components/Card";
@@ -18,7 +18,7 @@ export default function JuegoMemory({ navigation }: any) {
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
     const [incorrectCards, setIncorrectCards] = React.useState<number[]>([]); // Para cartas incorrectas
     const [score, setScore] = React.useState(0);
-    const [timeLeft, setTimeLeft] = React.useState(40);
+    const [timeLeft, setTimeLeft] = React.useState(5);
 
     const user = auth.currentUser;
 
@@ -44,7 +44,7 @@ export default function JuegoMemory({ navigation }: any) {
         if (board[selectedCards[0]] === board[selectedCards[1]]) {
             setMatchedCards((prev) => [...prev, ...selectedCards]);
             setScore((prev) => prev + 20);
-            setTimeLeft((prev) => prev + 2);
+            setTimeLeft((prev) => prev + 5);
         } else {
             setIncorrectCards((prev) => [...prev, ...selectedCards]); // Agregar a las cartas incorrectas
         }
@@ -60,7 +60,7 @@ export default function JuegoMemory({ navigation }: any) {
     // Reinicia el juego si todas las cartas coinciden
     useEffect(() => {
         if (matchedCards.length === board.length) {
-            setTimeLeft((prev) => prev + 5);
+            setTimeLeft((prev) => prev + 8);
             resetGame();
         }
     }, [matchedCards]);
@@ -99,10 +99,10 @@ export default function JuegoMemory({ navigation }: any) {
     return (
         <ImageBackground source={require("../assets/img/Iconos.jpg")} style={styles.container}>
             <View style={styles.headerContainer}>
-                <Text style={styles.title}>Memory</Text>
-                <Text style={styles.title}>Score: {score}</Text>
+                <Text style={styles.title}>MEMORY</Text>
+                <Text style={styles.title}>SCORE: {score}</Text>
                 <View style={styles.timeContainer}>
-                    <Text style={styles.title}>Tiempo restante: </Text>
+                    <Text style={styles.title}>TIEMPO RESTANTE: </Text>
                     <Text style={[styles.time, timeLeft <= 10 && styles.timeLow]}>{timeLeft}s</Text>
                 </View>
             </View>
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#0f172a",
     },
     headerContainer: {
-        backgroundColor: "rgba(0,0,0,0.6)",
+        backgroundColor: "rgba(0,0,0,0.9)",
         padding: 10,
         borderRadius: 10,
         marginBottom: 20,
