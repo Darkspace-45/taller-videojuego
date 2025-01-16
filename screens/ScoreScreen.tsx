@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../config/Config";
 import { onValue, ref } from "firebase/database";
+import { useFonts } from "expo-font";
 
 // Definimos la interfaz Record para representar un récord individual
 interface Record {
@@ -10,52 +11,80 @@ interface Record {
 }
 
 export default function ScoreScreen({ navigation }: any) {
+    const [fontsLoaded] = useFonts({
+        Retro: require("../assets/fonts/PressStart2P-Regular.ttf"), // Fuente retro de arcade
+    });
+
+    if (!fontsLoaded) {
+        return <Text>Cargando fuentes...</Text>; // Muestra un mensaje mientras las fuentes cargan
+    }
+
     const [record, setRecord] = useState<Record | null>(null);  // Estado para almacenar el récord del usuario actual
     const [allRecords, setAllRecords] = useState<Record[]>([]);  // Estado para almacenar todos los récords
     const user = auth.currentUser;  // Obtener el usuario autenticado
 
-    // Función para leer los puntajes y el nombre de usuario de Firebase
+    // Función para leer los puntajes de Firebase
     const leer = () => {
-        if (user && user.uid) {
-            const starCountRef = ref(db, 'usuarios/' + user.uid);  // Ruta del usuario en Firebase
-            onValue(starCountRef, (snapshot) => {
-                const data = snapshot.val();
-                setUserName(data?.nombre);  // Obtén el nombre desde la base de datos de Firebase
-                setRecord({
-                    username: data?.nombre || 'Usuario',  // Asume que 'nombre' es el campo donde guardas el nombre
-                    score: data?.score || 0,  // Asegúrate de tener el campo score en tu base de datos
-                });
-            });
-        }
+        const starCountRef = ref(db, 'users/');
+        onValue(starCountRef, (snapshot) => {
+            const data = snapshot.val();
+            let lista: any = Object.keys(data).map(uid => ({ uid, ...data[uid] }));
+            setAllRecords(lista);
+
+            // Filtramos y encontramos el récord del usuario actual usando user.uid
+            if (user && user.uid) {
+                const userRecord = lista.find((item: any) => item.uid === user.uid);
+                if (userRecord) {
+                    setRecord({ username: userRecord.username, score: userRecord.score });
+                }
+            }
+        });
     };
 
     useEffect(() => {
-        leer();  // Llamar la función para obtener los datos desde Firebase
+        leer();  // Llamar la función para obtener los puntajes desde Firebase
     }, [user]);
 
+    // Array con los colores que quieres que el texto de puntaje cambie
+    const colors = ["#FFD700", "#FF4500", "#32CD32", "#1E90FF", "#FF69B4"];
+
+    // Estado para controlar el índice de color
+    const [colorIndex, setColorIndex] = useState(0);
+
+    // Cambiar el color cada 500ms
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setColorIndex(prevIndex => (prevIndex + 1) % colors.length);
+        }, 500); // Cambiar de color cada medio segundo
+
+        return () => clearInterval(interval); // Limpiar el intervalo cuando el componente se desmonte
+    }, []);
+
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Tu Puntaje</Text>
-            {record ? (
-                <View style={styles.recordContainer}>
-                    <Text style={styles.recordText}>Puntaje: {record.score}</Text>
+        <ImageBackground source={require('../assets/img/videojuego1.jpg')} style={styles.backgroundImage}>
+            <SafeAreaView style={styles.container}>
+                <Text style={[styles.title, { color: colors[colorIndex] }]}>🏆Tu Puntaje🏆</Text>
+                {record ? (
+                    <View style={styles.recordContainer}>
+                        <Text style={[styles.recordText, { color: colors[colorIndex] }]}>Puntaje: {record.score}</Text>
+                    </View>
+                ) : (
+                    <Text style={styles.recordText}>Cargando puntaje...</Text>
+                )}
+                <View>
+                    {/* Mostrar el ranking general */}
+                    <Text style={styles.rankingTitle}>🌟 Ranking 🌟</Text>
+                    {allRecords.map((item, index) => (
+                        <Text key={index} style={styles.rankingText}>
+                            {index + 1}.{item.username}:{item.score}
+                        </Text>
+                    ))}
                 </View>
-            ) : (
-                <Text style={styles.recordText}>Cargando puntaje...</Text>
-            )}
-            <View>
-                {/* Si quieres mostrar todos los puntajes */}
-                <Text style={styles.title}>Ranking</Text>
-                {allRecords.map((item, index) => (
-                    <Text key={index} style={styles.recordText}>
-                        {item.username}: {item.score}
-                    </Text>
-                ))}
-            </View>
-            <TouchableOpacity style={styles.volverButton} onPress={() => navigation.navigate('dificultad')}>
-                <Text style={styles.volverText}>Volver</Text>
-            </TouchableOpacity>
-        </SafeAreaView>
+                <TouchableOpacity style={styles.volverButton} onPress={() => navigation.navigate('dificultad')}>
+                    <Text style={styles.volverText}>🔙 Volver</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        </ImageBackground>
     );
 }
 
@@ -109,7 +138,6 @@ const styles = StyleSheet.create({
     
     rankingText: {
         fontSize: 14,
-        color: "#00FFFF", // Color cian brillante
         textShadowColor: "#FFF",
         textShadowOffset: { width: 0, height: 0 },
         textShadowRadius: 5,
@@ -130,13 +158,9 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
     },
     volverText: {
-        fontSize: 14,
-        color: "#00FFFF", // Color cian brillante
-        textShadowColor: "#FFF",
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 5,
-        fontFamily: "Retro", // Asegúrate de que la fuente Retro esté cargada
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
-        padding: 15,
+        color: "#FFFFFF",
+        fontSize: 18,
+        fontWeight: "bold",
+        fontFamily: "PressStart2P",
     },
 });

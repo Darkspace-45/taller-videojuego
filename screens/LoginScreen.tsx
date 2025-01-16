@@ -15,20 +15,14 @@ export default function LoginScreen({ navigation }: any) {
     const rotateMiddle = new Animated.Value(0); 
 
     useEffect(() => {
-        
+        // Inicia la animación de rotación
         Animated.loop(
-            Animated.timing(rotateAnim, {
+            Animated.timing(rotateMiddle, {
                 toValue: 1,
                 duration: 2000,
                 useNativeDriver: true,
             })
         ).start();
-    };
-
-    useEffect(() => {
-        startRotation(rotateMiddle1);
-        startRotation(rotateMiddle2);
-        startRotation(rotateMiddle3);
     }, []);
 
     function login() {
@@ -84,37 +78,34 @@ export default function LoginScreen({ navigation }: any) {
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351196.png" }}
                         style={[styles.img, {
                             transform: [{
-                                rotateY: rotateMiddle1.interpolate({
+                                rotateY: rotateMiddle.interpolate({
                                     inputRange: [0, 1],
                                     outputRange: ['0deg', '720deg']
                                 })
                             }]
-                        }
-                        ]}
+                        }]}
                     />
                     <Animated.Image
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4614/4614235.png" }}
                         style={[styles.img, {
                             transform: [{
-                                rotateY: rotateMiddle2.interpolate({
+                                rotateY: rotateMiddle.interpolate({
                                     inputRange: [0, 1],
                                     outputRange: ['0deg', '720deg']
                                 })
                             }]
-                        }
-                        ]}
+                        }]}
                     />
                     <Animated.Image
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351463.png" }}
                         style={[styles.img, {
                             transform: [{
-                                rotateY: rotateMiddle3.interpolate({
+                                rotateY: rotateMiddle.interpolate({
                                     inputRange: [0, 1],
                                     outputRange: ['0deg', '720deg']
                                 })
                             }]
-                        }
-                        ]}
+                        }]}
                     />
                 </View>
 
