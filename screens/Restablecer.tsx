@@ -19,7 +19,7 @@ export default function RestablecerScreen({ navigation }: any) {
                 // ..
                 Alert.alert(errorCode, errorMessage)
             });
-    }
+    } 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Restablece tu contraseña</Text>

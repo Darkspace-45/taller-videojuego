@@ -23,11 +23,12 @@ const Card: React.FC<CardProps> = ({ isTurnedOver, onPress, children, style }) =
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#1e293b",
-        borderRadius: 8,
         margin: 5,
-        justifyContent: "center",
+        borderWidth: 4,
         alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#1e293b",
+        borderRadius: 5,
     },
     turnedOver: {
         backgroundColor: "#f87171",
