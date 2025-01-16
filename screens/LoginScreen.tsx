@@ -3,36 +3,46 @@ import React, { useState, useEffect } from 'react';
 import { TitleComponent } from '../components/title';
 import { BodyComponent } from '../components/BodyComponent';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/Config';
+import { auth, db } from '../config/Config'; // Importar db para guardar el nombre en Firebase
+import { ref, set } from 'firebase/database'; // Importar set para guardar datos
 
 export default function LoginScreen({ navigation }: any) {
     const [correo, setCorreo] = useState("");
     const [contraseña, setContraseña] = useState("");
+    const [nombreUsuario, setNombreUsuario] = useState(""); // Nuevo estado para el nombre del usuario
 
     // Animaciones
-    const rotateMiddle = new Animated.Value(0); 
+    const rotateMiddle = new Animated.Value(0);
 
     useEffect(() => {
-        
         Animated.loop(
             Animated.timing(rotateMiddle, {
                 toValue: 1,
-                duration: 2000, 
-                useNativeDriver: true, 
+                duration: 2000,
+                useNativeDriver: true,
             })
         ).start();
     }, []);
 
     function login() {
-        if (!correo || !contraseña) {
+        if (!correo || !contraseña || !nombreUsuario) {
             // Validación para campos vacíos
-            Alert.alert('Error', 'Por favor ingrese los datos en todos los campos.');
+            Alert.alert('Error', 'Por favor ingrese todos los datos.');
             return;
         }
         signInWithEmailAndPassword(auth, correo, contraseña)
             .then((userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
+
+                // Guardar el nombre del usuario en la base de datos de Firebase
+                const userRef = ref(db, 'usuarios/' + user.uid);
+                set(userRef, {
+                    nombre: nombreUsuario,  // Guardamos el nombre del usuario
+                    correo: correo,  // Guardamos el correo también si es necesario
+                    score: 0  // Inicializamos el puntaje a 0 (puedes cambiarlo dependiendo de la lógica)
+                });
+
                 console.log(user);
                 navigation.navigate('dificultad');
             })
@@ -71,10 +81,11 @@ export default function LoginScreen({ navigation }: any) {
                             transform: [{
                                 rotateY: rotateMiddle.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg'] 
+                                    outputRange: ['0deg', '720deg']
                                 })
                             }]
-                        }]}
+                        }
+                        ]}
                     />
                     <Animated.Image
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4614/4614235.png" }}
@@ -82,10 +93,11 @@ export default function LoginScreen({ navigation }: any) {
                             transform: [{
                                 rotateY: rotateMiddle.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg'] 
+                                    outputRange: ['0deg', '720deg']
                                 })
                             }]
-                        }]}
+                        }
+                        ]}
                     />
                     <Animated.Image
                         source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351463.png" }}
@@ -96,11 +108,19 @@ export default function LoginScreen({ navigation }: any) {
                                     outputRange: ['0deg', '720deg']
                                 })
                             }]
-                        }]}
+                        }
+                        ]}
                     />
                 </View>
 
                 <View style={styles.continput}>
+                    <TextInput
+                        placeholder='Nombre de usuario'
+                        placeholderTextColor={'black'}
+                        style={styles.input2}
+                        onChangeText={(texto) => setNombreUsuario(texto)}  // Actualizar nombre del usuario
+                        value={nombreUsuario}
+                    />
                     <TextInput
                         placeholder='Correo'
                         placeholderTextColor={'black'}
@@ -133,97 +153,97 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFFF', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
+        backgroundColor: '#FFFFFF',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     imgContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly', 
+        justifyContent: 'space-evenly',
         alignItems: 'center',
         marginTop: 30,
-        width: '80%', 
+        width: '80%',
     },
     img: {
         width: 110,
         height: 110,
         resizeMode: 'contain',
-        borderRadius: 55, 
+        borderRadius: 55,
     },
     continput: {
-        flexDirection: "column", 
-        alignItems: 'center', 
+        flexDirection: "column",
+        alignItems: 'center',
         marginTop: 20,
-        width: '85%', 
-        alignSelf: 'center', 
+        width: '85%',
+        alignSelf: 'center',
     },
     input: {
-        backgroundColor: '#FFF8E1', 
-        paddingVertical: 15, 
+        backgroundColor: '#FFF8E1',
+        paddingVertical: 15,
         paddingHorizontal: 18,
-        borderRadius: 10, 
+        borderRadius: 10,
         marginBottom: 15,
-        width: '100%', 
-        fontFamily: 'Georgia', 
+        width: '100%',
+        fontFamily: 'Georgia',
         fontSize: 18,
-        borderColor: '#D3A36E', 
+        borderColor: '#D3A36E',
         borderWidth: 2,
     },
     input2: {
-        backgroundColor: '#FFF8E1', 
-        paddingVertical: 15, 
+        backgroundColor: '#FFF8E1',
+        paddingVertical: 15,
         paddingHorizontal: 18,
-        borderRadius: 10, 
+        borderRadius: 10,
         marginBottom: 15,
-        width: '100%', 
-        fontFamily: 'Georgia', 
+        width: '100%',
+        fontFamily: 'Georgia',
         fontSize: 18,
-        borderColor: '#D3A36E', 
+        borderColor: '#D3A36E',
         borderWidth: 2,
     },
     titleBody: {
-        fontSize: 25, 
+        fontSize: 25,
         fontWeight: 'bold',
-        color: '#9E5A3E', 
+        color: '#9E5A3E',
         textAlign: 'center',
-        fontFamily: 'Papyrus', 
-        textShadowColor: '#D28F1D', 
+        fontFamily: 'Papyrus',
+        textShadowColor: '#D28F1D',
         textShadowOffset: { width: 3, height: 3 },
         textShadowRadius: 10,
     },
     descriptionBody: {
         fontSize: 18,
-        color: '#6F4F30', 
-        fontFamily: 'Georgia', 
+        color: '#6F4F30',
+        fontFamily: 'Georgia',
         textAlign: 'center',
         marginTop: 10,
     },
     btn: {
-        backgroundColor: '#FFF8E1', 
-        paddingVertical: 5, 
+        backgroundColor: '#FFF8E1',
+        paddingVertical: 5,
         paddingHorizontal: 18,
-        borderRadius: 0, 
+        borderRadius: 0,
         marginBottom: 15,
-        width: '100%', 
-        fontFamily: 'Georgia', 
+        width: '100%',
+        fontFamily: 'Georgia',
         fontSize: 18,
-        borderColor: '#D3A36E', 
+        borderColor: '#D3A36E',
         borderWidth: 2,
     },
     btnText: {
         fontSize: 20,
         fontWeight: 'bold',
         color: '#fff',
-        fontFamily: 'Arial', 
+        fontFamily: 'Arial',
     },
     smallText: {
         fontSize: 12,
-        color: '#9E5A3E', 
+        color: '#9E5A3E',
         marginTop: 10,
         textAlign: 'center',
-        fontFamily: 'Georgia', 
+        fontFamily: 'Georgia',
     },
-    restableco:{
+    restableco: {
         fontSize: 16,
         color: '#ee1133',
         textDecorationLine: 'underline',
