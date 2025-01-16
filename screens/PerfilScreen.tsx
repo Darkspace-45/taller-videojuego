@@ -1,42 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Image, Alert, Modal, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { 
+    View, 
+    Text, 
+    Image, 
+    Alert, 
+    Modal, 
+    TextInput, 
+    TouchableOpacity, 
+    StyleSheet, 
+    ImageBackground 
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { db, dbs, storage } from '../config/Config';
-import { MaterialIcons } from '@expo/vector-icons';  // Icon for profile
-import { update, ref as dbRef } from 'firebase/database'; // Usamos update para actualizar los datos
+import { update, ref as dbRef } from 'firebase/database';
+import { db } from '../config/Config';
+import { MaterialIcons } from '@expo/vector-icons'; 
+import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
+import { Buffer } from 'buffer';
 
 export default function PerfilScreen() {
     const [user, setUser] = useState<User | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [editModalVisible, setEditModalVisible] = useState(false); // Modal para editar perfil
+    const [editModalVisible, setEditModalVisible] = useState(false); 
     const [apellido, setApellido] = useState('');
-    const [correo, setCorreo] = useState('');
     const [edad, setEdad] = useState('');
     const [nombre, setNombre] = useState('');
     const [image, setImage] = useState<string | null>(null);
+    const [imageUrl, setImageUrl] = useState("");
 
-    const pickImagec = async () => {
-        let result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
-        }
-    };
+    const DROPBOX_ACCESS_TOKEN = "sl.u.AFehxyp0WbeytoWspqZvfuAieagLgWChB6qAtWXiSlQkAZEj5rmUtuXJiFzzWw5q_fhgf1t2Q4VrxjqHo6EBCMIzSJ2QJvjCHXIPe58Tb4h6B9wWPTKBjR2Az0vTx68y5pDB4BZUJyepilds_mmVkyRA9RZj8zyePZ8_5ygtWe_8ZHGaKvqSK9UV-8vDWS8XbagJL2H3fI_cFsTduGkyvHC-N1OA10FcRWz7YmFZBD-tE6gE55PqPnAuiQhveWnl8XZv_XY7x7He80Y_tUOlvb8bufi202qb1ksk56RLB1Jof3RhdLxzGOkWrSq0ZZawpj_9xO800fdA3-nBrziolHx399-hGzu7K33OB6jAkamL0BD8h8p63kiJ2m2ft99VtZmd17YZxn4DW5UUJMCqTk23jTxsJYI2X-MqHGUXUw1umnhMGAYmi88CPugQjnnYyLM_EPXcuj_HLfgpoHsxeT4kWC_6mulcDsslDhgD2edHy594gre5c_HakFrXtqzn9BQT7SqEWc4mOQcKkYHmXQuBRGrWyr1A_wuG-lv4ZI0SzOVt6RColLeEJTw2T_OfCxs1IKd7-GvyKQrZLnBnqE9BtlINGbpen1MBIMv0hDBoNdIZaLNAJMCKSFBc9jsnno_cRkLWL4OsenTiJGx_27kja4Wj9daeYwJVmV6H8_zYwLuYqpA3oJLJhsg6XqM6t7MrUn3wGObHJpqZubxDUwD6KIRFgD1xcKVqKPrK3jlCRxNtGljWa85J2hJuudoWGHfGZGTdoh6WTX2eJgk30d1HuVxtWfD_XmPc2UqLWKrjw1ZYumKzHsKch8TDIK8wVmdwaoB68Qs8kuulBYMoFtb0ThRIqqN8XL_nNKWq5-EXwKHq-0DnfIX6Ew90Q_k-4keu7geVVCXu8oDaZcvin6ICfPSbwtYHG3YvYJJmXY7GthEdrnDyE1jOavrGk71tYWK0Q9nDpjeDcSRokR33R2nZg3Zc19yzcrXXO6n3cIHjVRHXUB1cOq948TCuvtfoe_Qb2Xw_6osisds36h-Gj_LvalbNbULmO5HuUzjU7C5CrARneXDSwe9tL6mMHZ8DZeZ4xh1qOKQjQ6MTrPk08gFnHHKzADGwQLToFko-7BzvMSdC7LrqHTNgUwAiI9nSdCgyKorttblutIGA-7CeWGQkZj4H588IIRu6eer6aaCJoQT7y6Wxx6zmbuTdoNniMDWnyVZfkKUasl9rEWIv0a5nWE7tyL0cwfL7CcpP1S09DNKj1_z1btglvGwZ2qPIHILp_lURgv7YzWdNaXSlLw9OolDOwaeWdi2ZyGBQG9IsHlfjxnYqUGNBv1Sx4GgMwxRSRTZ1D5PX7smZyGWjrXemG5_rEgmkB1MciblxpjU4Z9NWifQ-qxCb7YLF3XcHHhXXLFE-sWnVT-zmq0DzwSPZEVmaXU35Xs-7SdeJRbeG4Q"; // Reemplaza con tu token de Dropbox
 
     useEffect(() => {
         const auth = getAuth();
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUser(user);
+                if (user.displayName) {
+                    setNombre(user.displayName);
+                }
             } else {
                 setUser(null);
             }
@@ -60,157 +63,213 @@ export default function PerfilScreen() {
 
         if (!result.canceled) {
             setSelectedImage(result.assets[0].uri);
+            setImage(result.assets[0].uri);
         }
     };
 
-    const handleSavePhoto = async () => {
-        if (selectedImage && user) {
-            try {
-                const response = await fetch(selectedImage);
-                const blob = await response.blob();
-                const storageRef = ref(storage, `profile_images/${user.uid}`);
-                const uploadTask = uploadBytesResumable(storageRef, blob);
+    const pickImageFromCamera = async () => {
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
 
-                uploadTask.on(
-                    'state_changed',
-                    (snapshot) => {},
-                    (error) => {
-                        console.error('Error al subir la imagen:', error);
-                    },
-                    async () => {
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        const userDocRef = doc(dbs, 'users', user.uid);
-                        await setDoc(userDocRef, {
-                            photoURL: downloadURL,
-                        }, { merge: true });
-
-                        Alert.alert('Foto de ranking guardada correctamente');
-                    }
-                );
-            } catch (error) {
-                console.error('Error al guardar la foto:', error);
-                Alert.alert('Hubo un error al guardar la foto');
-            }
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
         }
     };
 
-    // Función para editar el perfil con update()
-    function Editar() {
+    const subirImagen = async () => {
+      if (!image) {
+        Alert.alert('Error', 'Primero selecciona una imagen');
+        return;
+      }
+  
+      const ACCESS_TOKEN = DROPBOX_ACCESS_TOKEN; 
+  
+      try {
+
+        const fileData = await FileSystem.readAsStringAsync(image, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+  
+
+        const fileBuffer = Buffer.from(fileData, 'base64'); // Utiliza Buffer importado
+  
+        // Generar un nombre único basado en la fecha y hora actual
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, ''); // YYYY-MM-DD_HH-MM-SS
+        const fileName = `Imagen_${timestamp}.jpg`; // Puedes cambiar la extensión según el tipo de archivo
+  
+        const dropboxArg = {
+          path: `/${fileName}`, 
+          mode: 'add',
+          autorename: true,
+          mute: false,
+        };
+  
+        // Subir el archivo binario a Dropbox
+        const result = await axios.post(
+          'https://content.dropboxapi.com/2/files/upload',
+          fileBuffer,
+          {
+            headers: {
+              Authorization: `Bearer ${ACCESS_TOKEN}`,
+              'Dropbox-API-Arg': JSON.stringify(dropboxArg),
+              'Content-Type': 'application/octet-stream', 
+            },
+          }
+        );
+  
+        console.log('Dropbox response:', result.data);
+  
+        // Después de la subida, obtener la URL de la imagen
+        const filePath = result.data.path_display; 
+  
+        // Solicitar el enlace de descarga del archivo
+        const sharedLinkResult = await axios.post(
+          'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',
+          {
+            path: filePath, // Ruta del archivo
+            settings: {
+              requested_visibility: 'public', // Hacer el enlace público
+            },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${ACCESS_TOKEN}`,
+            },
+          }
+        );
+  
+        // Obtener la URL del enlace compartido
+        const downloadUrl = sharedLinkResult.data.url.replace('?dl=0', '?raw=1');  // Hacer que la URL sea de descarga directa
+  
+        console.log('URL de descarga directa:', downloadUrl);
+        setImageUrl(downloadUrl); // Guardar la URL de la imagen subida
+  
+        Alert.alert('Éxito', 'Imagen subida correctamente a Dropbox');
+      } catch (error) {
+        //console.error('Error al subir la imagen:', error.response?.data || error.message);
+        Alert.alert('Error', 'Hubo un problema al subir la imagen');
+      }
+    };
+
+    const editarPerfil = () => {
         if (user) {
-            update(dbRef(db, 'users/' + nombre), {
+            update(dbRef(db, 'users/' + user.uid), {
                 apellido: apellido,
-                correo: correo,
+                nombre: nombre,
                 edad: edad,
             }).then(() => {
-                Alert.alert(
-                    'Datos editados',
-                    'Los datos del usuario han sido editados con éxito',
-                    [
-                        { text: 'OK', onPress: () => console.log('OK Pressed') },
-                    ],
-                    { cancelable: false }
-                );
-                setEditModalVisible(false); // Cerrar el modal después de editar
+                Alert.alert('Datos editados', 'Los datos del usuario han sido editados con éxito');
+                setEditModalVisible(false);
             }).catch((error) => {
                 console.error('Error al actualizar los datos:', error);
                 Alert.alert('Error', 'Hubo un problema al editar los datos');
             });
         }
-    }
+    };
 
     return (
-        <View style={styles.container}>
-            {user ? (
-                <>
-                    <Text style={styles.text}>Bienvenido, {user.displayName || user.email}</Text>
+        <ImageBackground
+            source={require('../assets/fonts/b1f49e424ca2ac63c7ecb00cbe844e4e.jpg')}
+            style={styles.backgroundImage}
+        >
+            <View style={styles.container}>
+                {user ? (
+                    <>
+                        <Text style={styles.text}>Bienvenido, {nombre || user.email}</Text>
 
-                    {/* Icono de perfil */}
-                    <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.profileIcon}>
-                        <MaterialIcons name="account-circle" size={100} color="black" />
-                    </TouchableOpacity>
-
-                    {/* Botón "Editar Perfil" */}
-                    <TouchableOpacity onPress={() => setEditModalVisible(true)} style={styles.editButton}>
-                        <Text style={styles.text}>Editar Perfil</Text>
-                    </TouchableOpacity>
-
-                    {/* Modal para elegir imagen o cámara */}
-                    <Modal
-                        visible={modalVisible}
-                        animationType="slide"
-                        transparent={true}
-                        onRequestClose={() => setModalVisible(false)}
-                    >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContent}>
-                                <Text style={styles.modalTitle}>Seleccionar Foto</Text>
-                                <Button title="Seleccionar Foto desde la Galería" onPress={pickImage} />
-                                <Button title="Tomar Foto con la Cámara" onPress={pickImagec} />
-                                <Button title="Cancelar" onPress={() => setModalVisible(false)} />
-                            </View>
-                        </View>
-                    </Modal>
-
-                    {/* Modal de edición de perfil */}
-                    <Modal
-                        visible={editModalVisible}
-                        animationType="slide"
-                        transparent={true}
-                        onRequestClose={() => setEditModalVisible(false)}
-                    >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContent}>
-                                <Text style={styles.modalTitle}>Editar Perfil</Text>
-
-                                <TextInput
-                                    placeholder="Nombre"
-                                    value={nombre}
-                                    onChangeText={(text) => setNombre(text)}
-                                    style={styles.input}
-                                />
-
-                                <TextInput
-                                    placeholder="Apellido"
-                                    value={apellido}
-                                    onChangeText={setApellido}
-                                    style={styles.input}
-                                />
-                                <TextInput
-                                    placeholder="Correo"
-                                    value={correo}
-                                    onChangeText={setCorreo}
-                                    style={styles.input}
-                                />
-                                <TextInput
-                                    placeholder="Edad"
-                                    value={edad}
-                                    onChangeText={setEdad}
-                                    style={styles.input}
-                                    keyboardType="numeric" // Para edades, podemos ponerlo como numérico
-                                />
-
-                                <Button title="Guardar Cambios" onPress={Editar} />
-                                <Button title="Cancelar" onPress={() => setEditModalVisible(false)} />
-                            </View>
-                        </View>
-                    </Modal>
-
-                    {/* Mostrar la imagen seleccionada */}
-                    {selectedImage && (
-                        <View style={styles.selectedImageContainer}>
-                            <Text style={styles.text}>Foto seleccionada:</Text>
+                        {image && (
                             <Image
-                                source={{ uri: selectedImage }}
-                                style={styles.selectedImage}
+                                source={{ uri: image }}
+                                style={styles.profileImage}
                             />
-                            <Button title="Guardar Foto de Ranking" onPress={handleSavePhoto} />
-                        </View>
-                    )}
-                </>
-            ) : (
-                <Text style={styles.text}>Cargando usuario...</Text>
-            )}
-        </View>
+                        )}
+
+                        <TouchableOpacity onPress={() => setEditModalVisible(true)} style={styles.profileIcon}>
+                            <MaterialIcons name="edit" size={50} color="black" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.profileIcon}>
+                            <MaterialIcons name="account-circle" size={50} color="black" />
+                        </TouchableOpacity>
+
+                        <Modal
+                            visible={modalVisible}
+                            animationType="slide"
+                            transparent={true}
+                            onRequestClose={() => setModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContent}>
+                                    <Text style={styles.modalTitle}>Seleccionar Foto</Text>
+
+                                    <TouchableOpacity style={styles.modalButton} onPress={pickImage}>
+                                        <Text style={styles.modalButtonText}>Seleccionar Foto desde la Galería</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={styles.modalButton} onPress={pickImageFromCamera}>
+                                        <Text style={styles.modalButtonText}>Tomar Foto con la Cámara</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={styles.modalButton} onPress={subirImagen}>
+                                        <Text style={styles.modalButtonText}>Subir Imagen</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+                                        <Text style={styles.cancelButtonText}>Cerrar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
+
+                        <Modal
+                            visible={editModalVisible}
+                            animationType="slide"
+                            transparent={true}
+                            onRequestClose={() => setEditModalVisible(false)}
+                        >
+                            <View style={styles.modalOverlay}>
+                                <View style={styles.modalContent}>
+                                    <Text style={styles.modalTitle}>Editar Perfil</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Nombre"
+                                        value={nombre}
+                                        onChangeText={setNombre}
+                                    />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Apellido"
+                                        value={apellido}
+                                        onChangeText={setApellido}
+                                    />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Edad"
+                                        value={edad}
+                                        onChangeText={setEdad}
+                                    />
+
+                                    <TouchableOpacity style={styles.saveButton} onPress={editarPerfil}>
+                                        <Text style={styles.saveButtonText}>Guardar Cambios</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity style={styles.cancelButton} onPress={() => setEditModalVisible(false)}>
+                                        <Text style={styles.cancelButtonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
+                    </>
+                ) : (
+                    <Text style={styles.text}>Cargando...</Text>
+                )}
+            </View>
+        </ImageBackground>
     );
 }
 
@@ -219,16 +278,21 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f2f2f2',
+    },
+    text: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color:'#ffffff',
+        marginBottom: 20
+    },
+    profileImage: {
+        width: 150,
+        height: 150,
+        borderRadius: 75,
+        marginBottom: 20,
     },
     profileIcon: {
-        marginTop: 20,
-    },
-    editButton: {
-        marginTop: 20,
-        padding: 10,
-        backgroundColor: '#007BFF',
-        borderRadius: 5,
+        marginBottom: 10,
     },
     modalOverlay: {
         flex: 1,
@@ -244,31 +308,60 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
     },
-    input: {
-        width: '80%',
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
+    modalButton: {
+        backgroundColor: '#4CAF50',
+        padding: 10,
         borderRadius: 5,
-        marginBottom: 15,
-        paddingLeft: 10,
-    },
-    selectedImageContainer: {
-        marginTop: 20,
+        marginVertical: 5,
+        width: '100%',
         alignItems: 'center',
     },
-    selectedImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 10,
-        marginTop: 10,
-    },
-    text: {
-        color: 'snow',
+    modalButtonText: {
+        color: 'white',
         fontSize: 16,
+    },
+    cancelButton: {
+        backgroundColor: '#f44336',
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 10,
+        width: '100%',
+        alignItems: 'center',
+    },
+    cancelButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    input: {
+        width: '100%',
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginBottom: 10,
+        paddingLeft: 10,
+        borderRadius: 5,
+    },
+    saveButton: {
+        backgroundColor: '#4CAF50',
+        padding: 10,
+        borderRadius: 5,
+        marginVertical: 10,
+        width: '100%',
+        alignItems: 'center',
+    },
+    saveButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    backgroundImage: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
