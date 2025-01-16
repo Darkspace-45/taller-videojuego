@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     },
     recordText: {
         fontSize: 14,
-        textShadowColor: "#FFF",
+        textShadowColor: "#000",
         textShadowOffset: { width: 0, height: 0 },
         textShadowRadius: 5,
         fontFamily: "Retro", // Asegúrate de que la fuente Retro esté cargada
@@ -138,7 +138,8 @@ const styles = StyleSheet.create({
     
     rankingText: {
         fontSize: 14,
-        textShadowColor: "#FFF",
+        textShadowColor: "#000",
+        color: "#00FFFF",
         textShadowOffset: { width: 0, height: 0 },
         textShadowRadius: 5,
         fontFamily: "Retro", // Asegúrate de que la fuente Retro esté cargada
@@ -158,9 +159,13 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
     },
     volverText: {
-        color: "#FFFFFF",
-        fontSize: 18,
-        fontWeight: "bold",
-        fontFamily: "PressStart2P",
+        fontSize: 14,
+        textShadowColor: "#000",
+        color: "#00FFFF",
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 5,
+        fontFamily: "Retro", // Asegúrate de que la fuente Retro esté cargada
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        padding: 10,
     },
 });

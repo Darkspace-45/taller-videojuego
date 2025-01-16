@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Dimensions, ImageBackground } from "react-native";
+import { StyleSheet, Text, View, Dimensions, ImageBackground, Animated, TouchableOpacity } from "react-native";
 import { auth, db } from "../config/Config";
 import { get, ref, set } from "firebase/database";
 import Card from "../components/Card";
@@ -12,11 +12,6 @@ const doomCards: string[] = [
     "⚔️", "⚔️", "🦂", "🦂"
 ];
 
-type RootStackParamList = {
-    JuegoDoom: undefined;
-    ScoreScreen: { score: number };
-};
-
 export default function JuegoDoom({ navigation }: any) {
     const [fontsLoaded] = useFonts({
         Memoria: require("../assets/fonts/AmazDooMLeft.ttf"),
@@ -27,7 +22,11 @@ export default function JuegoDoom({ navigation }: any) {
     const [matchedCards, setMatchedCards] = React.useState<number[]>([]);
     const [incorrectCards, setIncorrectCards] = React.useState<number[]>([]); // Para cartas incorrectas
     const [score, setScore] = React.useState<number>(0);
-    const [timeLeft, setTimeLeft] = React.useState<number>(55); // Tiempo inicial en segundos
+    const [timeLeft, setTimeLeft] = React.useState<number>(60); // Tiempo inicial en segundos
+
+    const [showCongratulation, setShowCongratulation] = useState(false);
+    const [isPaused, setIsPaused] = useState(false); // Estado para pausar el contador
+    const [buttonColor] = useState(new Animated.Value(0));
 
     const user = auth.currentUser;
 
@@ -38,9 +37,15 @@ export default function JuegoDoom({ navigation }: any) {
             return;
         }
 
+        if (isPaused) return; // Detener el temporizador si el juego está en pausa
+
         const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
         return () => clearInterval(timerId);
-    }, [timeLeft, score, navigation]);
+    }, [timeLeft, isPaused, navigation]);
+
+    if (!fontsLoaded) {
+        return <Text>Cargando fuentes...</Text>;
+    }
 
     // Lógica de coincidencia de cartas
     useEffect(() => {
@@ -65,13 +70,32 @@ export default function JuegoDoom({ navigation }: any) {
     // Reinicia el juego si todas las cartas coinciden
     useEffect(() => {
         if (matchedCards.length === board.length) {
-            setTimeLeft((prev) => prev + 8);
-            resetGame();
+            setShowCongratulation(true); // Mostrar felicitación
+            setIsPaused(true); // Pausar el contador
         }
     }, [matchedCards]);
 
     // Guarda el puntaje en Firebase
-    const saveScore = async () => {
+    useEffect(() => {
+        if (showCongratulation) {
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(buttonColor, {
+                        toValue: 1,
+                        duration: 500,
+                        useNativeDriver: false,
+                    }),
+                    Animated.timing(buttonColor, {
+                        toValue: 0,
+                        duration: 500,
+                        useNativeDriver: false,
+                    }),
+                ])
+            ).start();
+        }
+    }, [showCongratulation]);
+
+    const saveScore = async (): Promise<void> => {
         if (user && user.uid) {
             const scoresRef = ref(db, `users/${user.uid}/score`);
             const snapshot = await get(scoresRef);
@@ -96,16 +120,12 @@ export default function JuegoDoom({ navigation }: any) {
         setBoard(shuffle([...doomCards]));
         setSelectedCards([]);
         setMatchedCards([]);
+        setShowCongratulation(false); // Ocultar felicitación
+        setIsPaused(false); // Reanudar temporizador
     };
 
     const { width } = Dimensions.get("window");
     const cardSize = width / 5 - 12;
-
-    ////////
-    if (!fontsLoaded) {
-        return <Text>Cargando fuentes...</Text>; // Muestra un mensaje mientras las fuentes cargan
-    }
-    ////////
 
     return (
         <ImageBackground source={require("../assets/img/FondoDoom.jpg")} style={styles.container}>
@@ -121,14 +141,12 @@ export default function JuegoDoom({ navigation }: any) {
                 {board.map((card, index) => {
                     const isTurnedOver = selectedCards.includes(index) || matchedCards.includes(index);
                     const isMatched = matchedCards.includes(index);
-                    const isIncorrect = incorrectCards.includes(index); // Verifica si es incorrecta
-                    let borderColor = "white"; // Color por defecto
+                    const isIncorrect = incorrectCards.includes(index);
+                    let borderColor = "white";
 
-                    // Si la carta está emparejada, poner verde
                     if (isMatched) {
                         borderColor = "green";
                     }
-                    // Si las dos cartas son incorrectas, poner rojo
                     if (isIncorrect && !isMatched) {
                         borderColor = "red";
                     }
@@ -142,7 +160,7 @@ export default function JuegoDoom({ navigation }: any) {
                                 width: cardSize,
                                 height: cardSize,
                                 ...styles.card,
-                                borderColor: borderColor, // Cambiar color del borde
+                                borderColor: borderColor,
                             }}
                         >
                             {isTurnedOver ? card : "❓"}
@@ -150,6 +168,39 @@ export default function JuegoDoom({ navigation }: any) {
                     );
                 })}
             </View>
+            {showCongratulation && (
+                <View style={styles.congratulationContainer}>
+                    <Text style={styles.congratulationText}>¡FELICIDADES, DESEAS MÁS DIFICULTAD?</Text>
+
+                    <View style={styles.buttonsContainer}>
+                        <Animated.View
+                            style={[styles.button, {
+                                backgroundColor: buttonColor.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['#FF6347', '#4CAF50']
+                                })
+                            }]}
+                        >
+                            <TouchableOpacity onPress={() => navigation.navigate("Tabs")}>
+                                <Text style={styles.buttonText1}>👉 PUNTUACIÓN</Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+
+                        <Animated.View
+                            style={[styles.button, {
+                                backgroundColor: buttonColor.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ['#FF6347', '#4CAF50']
+                                })
+                            }]}
+                        >
+                            <TouchableOpacity onPress={resetGame}>
+                                <Text style={styles.buttonText2}>🎮 CONTINUAR JUGANDO</Text>
+                            </TouchableOpacity>
+                        </Animated.View>
+                    </View>
+                </View>
+            )}
             <StatusBar style="light" />
         </ImageBackground>
     );
@@ -170,7 +221,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontFamily: "Doom", // Fuente específica para el botón de "Doom"
-        fontSize: 56,
+        fontSize: 55,
         color: "#FFFF",
         textAlign: "center",
         textShadowColor: "#000",
@@ -184,7 +235,7 @@ const styles = StyleSheet.create({
     },
     time: {
         fontFamily: "Doom", // Fuente específica para el botón de "Doom"
-        fontSize: 56,
+        fontSize: 55,
         color: "#FFFF",
         textAlign: "center",
         textShadowColor: "#000",
@@ -207,9 +258,48 @@ const styles = StyleSheet.create({
         backgroundColor: "#1e293b",
         borderRadius: 5,
     },
+    congratulationContainer: {
+        position: "absolute",
+        top: "50%",
+        left: "40%",
+        transform: [{ translateX: -150 }, { translateY: -50 }],
+        backgroundColor: "#000",
+        padding: 16,
+        borderRadius: 10,
+        marginBottom: 20,
+
+    },
+    congratulationText: {
+        color: "#fff",
+        fontSize: 20,
+        fontFamily: "Memoria",
+        marginBottom: 15,
+    },
+    button: {
+        paddingVertical: 1,
+        paddingHorizontal: 1,
+        borderRadius: 5,
+    },
+    buttonText1: {
+        color: "#fff",
+        fontSize: 28,
+        fontFamily: "Memoria",
+    },
+    buttonText2: {
+        color: "#fff",
+        fontSize: 28,
+        fontFamily: "Memoria",
+    },
+    buttonsContainer: {
+        flexDirection: "column",  // Cambiar para que los botones estén uno debajo del otro
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 10,  // Espacio entre los botones y el mensaje
+        gap: 20, // Espacio entre los botones
+    },
+
 });
 
-// Shuffle function
 function shuffle<T>(array: T[]): T[] {
     for (let i = array.length - 1; i > 0; i--) {
         const randomIndex = Math.floor(Math.random() * (i + 1));

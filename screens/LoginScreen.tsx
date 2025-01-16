@@ -3,19 +3,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { TitleComponent } from '../components/title';
 import { BodyComponent } from '../components/BodyComponent';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '../config/Config'; // Importar db para guardar el nombre en Firebase
-import { ref, set } from 'firebase/database'; // Importar set para guardar datos
+import { auth, db } from '../config/Config';
+import { ref, set } from 'firebase/database';
 
 export default function LoginScreen({ navigation }: any) {
     const [correo, setCorreo] = useState("");
     const [contraseña, setContraseña] = useState("");
     const [nombreUsuario, setNombreUsuario] = useState(""); // Nuevo estado para el nombre del usuario
 
-    // Animaciones
-    const rotateMiddle = new Animated.Value(0); 
+    // Referencias para las animaciones
+    const rotateMiddle = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        // Inicia la animación de rotación
+        // Inicia la animación de rotación de manera continua
         Animated.loop(
             Animated.timing(rotateMiddle, {
                 toValue: 1,
@@ -38,8 +38,8 @@ export default function LoginScreen({ navigation }: any) {
                 // Guardar el nombre del usuario en la base de datos de Firebase
                 const userRef = ref(db, 'usuarios/' + user.uid);
                 set(userRef, {
-                    nombre: nombreUsuario,  // Guardamos el nombre del usuario
-                    correo: correo,  // Guardamos el correo también si es necesario
+                    nombre: nombreUsuario,
+                    correo: correo,
                     score: 0  // Inicializamos el puntaje a 0 (puedes cambiarlo dependiendo de la lógica)
                 });
 
@@ -74,39 +74,21 @@ export default function LoginScreen({ navigation }: any) {
                     <Text style={styles.descriptionBody}>Inicia sesión para acceder al juego.</Text>
                 </View>
                 <View style={styles.imgContainer}>
-                    <Animated.Image
-                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351196.png" }}
-                        style={[styles.img, {
-                            transform: [{
-                                rotateY: rotateMiddle.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg']
-                                })
-                            }]
-                        }]}
-                    />
-                    <Animated.Image
-                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/4614/4614235.png" }}
-                        style={[styles.img, {
-                            transform: [{
-                                rotateY: rotateMiddle.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg']
-                                })
-                            }]
-                        }]}
-                    />
-                    <Animated.Image
-                        source={{ uri: "https://cdn-icons-png.flaticon.com/128/4351/4351463.png" }}
-                        style={[styles.img, {
-                            transform: [{
-                                rotateY: rotateMiddle.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: ['0deg', '720deg']
-                                })
-                            }]
-                        }]}
-                    />
+                    {/* Tres imágenes que rotan */}
+                    {['4351/4351196.png', '4614/4614235.png', '4351/4351463.png'].map((img, index) => (
+                        <Animated.Image
+                            key={index}
+                            source={{ uri: `https://cdn-icons-png.flaticon.com/128/${img}` }}
+                            style={[styles.img, {
+                                transform: [{
+                                    rotateY: rotateMiddle.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['0deg', '720deg']
+                                    })
+                                }]
+                            }]}
+                        />
+                    ))}
                 </View>
 
                 <View style={styles.continput}>
