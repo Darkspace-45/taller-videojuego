@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    View, 
-    Text, 
-    Image, 
-    Alert, 
-    Modal, 
-    TextInput, 
-    TouchableOpacity, 
-    StyleSheet, 
-    ImageBackground 
+import {
+    View,
+    Text,
+    Image,
+    Alert,
+    Modal,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    ImageBackground
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { update, ref as dbRef } from 'firebase/database';
 import { db } from '../config/Config';
-import { MaterialIcons } from '@expo/vector-icons'; 
+import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { Buffer } from 'buffer';
@@ -23,7 +23,7 @@ export default function PerfilScreen() {
     const [user, setUser] = useState<User | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [editModalVisible, setEditModalVisible] = useState(false); 
+    const [editModalVisible, setEditModalVisible] = useState(false);
     const [apellido, setApellido] = useState('');
     const [edad, setEdad] = useState('');
     const [nombre, setNombre] = useState('');
@@ -81,79 +81,79 @@ export default function PerfilScreen() {
     };
 
     const subirImagen = async () => {
-      if (!image) {
-        Alert.alert('Error', 'Primero selecciona una imagen');
-        return;
-      }
-  
-      const ACCESS_TOKEN = DROPBOX_ACCESS_TOKEN; 
-  
-      try {
+        if (!image) {
+            Alert.alert('Error', 'Primero selecciona una imagen');
+            return;
+        }
 
-        const fileData = await FileSystem.readAsStringAsync(image, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-  
+        const ACCESS_TOKEN = DROPBOX_ACCESS_TOKEN;
 
-        const fileBuffer = Buffer.from(fileData, 'base64'); // Utiliza Buffer importado
-  
-        // Generar un nombre único basado en la fecha y hora actual
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, ''); // YYYY-MM-DD_HH-MM-SS
-        const fileName = `Imagen_${timestamp}.jpg`; // Puedes cambiar la extensión según el tipo de archivo
-  
-        const dropboxArg = {
-          path: `/${fileName}`, 
-          mode: 'add',
-          autorename: true,
-          mute: false,
-        };
-  
-        // Subir el archivo binario a Dropbox
-        const result = await axios.post(
-          'https://content.dropboxapi.com/2/files/upload',
-          fileBuffer,
-          {
-            headers: {
-              Authorization: `Bearer ${ACCESS_TOKEN}`,
-              'Dropbox-API-Arg': JSON.stringify(dropboxArg),
-              'Content-Type': 'application/octet-stream', 
-            },
-          }
-        );
-  
-        console.log('Dropbox response:', result.data);
-  
-        // Después de la subida, obtener la URL de la imagen
-        const filePath = result.data.path_display; 
-  
-        // Solicitar el enlace de descarga del archivo
-        const sharedLinkResult = await axios.post(
-          'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',
-          {
-            path: filePath, // Ruta del archivo
-            settings: {
-              requested_visibility: 'public', // Hacer el enlace público
-            },
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${ACCESS_TOKEN}`,
-            },
-          }
-        );
-  
-        // Obtener la URL del enlace compartido
-        const downloadUrl = sharedLinkResult.data.url.replace('?dl=0', '?raw=1');  // Hacer que la URL sea de descarga directa
-  
-        console.log('URL de descarga directa:', downloadUrl);
-        setImageUrl(downloadUrl); // Guardar la URL de la imagen subida
-  
-        Alert.alert('Éxito', 'Imagen subida correctamente a Dropbox');
-      } catch (error) {
-        //console.error('Error al subir la imagen:', error.response?.data || error.message);
-        Alert.alert('Error', 'Hubo un problema al subir la imagen');
-      }
+        try {
+
+            const fileData = await FileSystem.readAsStringAsync(image, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+
+            const fileBuffer = Buffer.from(fileData, 'base64'); // Utiliza Buffer importado
+
+            // Generar un nombre único basado en la fecha y hora actual
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, ''); // YYYY-MM-DD_HH-MM-SS
+            const fileName = `Imagen_${timestamp}.jpg`; // Puedes cambiar la extensión según el tipo de archivo
+
+            const dropboxArg = {
+                path: `/${fileName}`,
+                mode: 'add',
+                autorename: true,
+                mute: false,
+            };
+
+            // Subir el archivo binario a Dropbox
+            const result = await axios.post(
+                'https://content.dropboxapi.com/2/files/upload',
+                fileBuffer,
+                {
+                    headers: {
+                        Authorization: `Bearer ${ACCESS_TOKEN}`,
+                        'Dropbox-API-Arg': JSON.stringify(dropboxArg),
+                        'Content-Type': 'application/octet-stream',
+                    },
+                }
+            );
+
+            console.log('Dropbox response:', result.data);
+
+            // Después de la subida, obtener la URL de la imagen
+            const filePath = result.data.path_display;
+
+            // Solicitar el enlace de descarga del archivo
+            const sharedLinkResult = await axios.post(
+                'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings',
+                {
+                    path: filePath, // Ruta del archivo
+                    settings: {
+                        requested_visibility: 'public', // Hacer el enlace público
+                    },
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${ACCESS_TOKEN}`,
+                    },
+                }
+            );
+
+            // Obtener la URL del enlace compartido
+            const downloadUrl = sharedLinkResult.data.url.replace('?dl=0', '?raw=1');  // Hacer que la URL sea de descarga directa
+
+            console.log('URL de descarga directa:', downloadUrl);
+            setImageUrl(downloadUrl); // Guardar la URL de la imagen subida
+
+            Alert.alert('Éxito', 'Imagen subida correctamente a Dropbox');
+        } catch (error) {
+            //console.error('Error al subir la imagen:', error.response?.data || error.message);
+            Alert.alert('Error', 'Hubo un problema al subir la imagen');
+        }
     };
 
     const editarPerfil = () => {
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 20,
         fontWeight: 'bold',
-        color:'#ffffff',
+        color: '#ffffff',
         marginBottom: 20
     },
     profileImage: {
