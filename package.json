@@ -24,13 +24,13 @@
     "buffer": "^6.0.3",
     "dropbox": "^10.34.0",
     "expo": "~52.0.23",
-<<<<<<< HEAD
+
     "expo-av": "^15.0.2",
     "expo-file-system": "~18.0.7",
-=======
+
     "expo-av": "~15.0.2",
     "expo-file-system": "^18.0.6",
->>>>>>> e7481b5d16f5e56454687b79c85dbd049d6f48a8
+
     "expo-image-picker": "~16.0.4",
     "expo-status-bar": "~2.0.0",
     "firebase": "^11.1.0",
