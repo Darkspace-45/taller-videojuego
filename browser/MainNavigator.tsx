@@ -33,6 +33,7 @@ function MyTabs() {
                             <Text>🏆</Text>
                         </View>
                     ),
+                    headerShown: false 
                 }}
             />
             <Tab.Screen
@@ -44,6 +45,7 @@ function MyTabs() {
                             <Text>👥</Text>
                         </View>
                     ),
+                    headerShown: false 
                 }}
             />
             <Tab.Screen
@@ -55,6 +57,7 @@ function MyTabs() {
                             <Text>👤</Text>
                         </View>
                     ),
+                    headerShown: false 
                 }}
             />
         </Tab.Navigator>
